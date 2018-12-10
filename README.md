@@ -13,14 +13,25 @@ This plugin requires Craft CMS 3.0.0-beta.23 or later.
 To install the plugin, follow these instructions.
 
 1. Open your terminal and go to your Craft project:
-
-        cd /path/to/project
-
-2. Then tell Composer to load the plugin:
-
-        composer require fork/embeds
-
-3. In the Control Panel, go to Settings → Plugins and click the “Install” button for Embeds.
+    ```
+    cd /path/to/project
+    ```
+2. (As long as this is unreleased) Add the repository to your composer.json:
+    ```
+    {
+        "repositories": [
+            {
+                "type": "vcs",
+                "url":  "git@github.com:fork/embeds.git"
+            }
+        ]
+    }
+    ```
+3. Then tell Composer to load the plugin:
+    ```
+    composer require fork/embeds
+    ```
+4. In the Control Panel, go to Settings → Plugins and click the “Install” button for Embeds.
 
 ## Embeds Overview
 
