@@ -1,0 +1,58 @@
+/**
+ * Embeds plugin for Craft CMS
+ *
+ * Embeds CSS
+ *
+ * @author    Fork Unstable Media GmbH
+ * @copyright Copyright (c) 2018 Fork Unstable Media GmbH
+ * @link      http://fork.de
+ * @package   Embeds
+ * @since     1.0.0
+ */
+
+body .redactor-toolbar .re-icon-embed {
+    display: block;
+    margin: -4px 0;
+    width: 25px;
+    height: 25px;
+    background-image: url(../img/embed.png);
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
+body .redactor-in .redactor_pagebreak {
+    position: relative;
+    display: block !important;
+    padding: 7px;
+    height: 3px;
+    border-top: 2px dotted rgba(0,0,0,0.3) !important;
+    background: none !important;
+    -moz-user-select: none;
+}
+body .redactor-in .redactor_pagebreak:after {
+    content: attr(data-embed);
+    position: absolute;
+    top: 0;
+    padding: 1px;
+    z-index: 13;
+    color: #576575;
+    font-family: system-ui, system-ui, -apple-system, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    font-size: 12px;
+    line-height: 1.2;
+    background: #ebedef;
+    pointer-events: none;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
+only screen and (   -moz-min-device-pixel-ratio: 1.5),
+only screen and (     -o-min-device-pixel-ratio: 3/2),
+only screen and (        min-device-pixel-ratio: 1.5),
+only screen and (        min-resolution: 1.5dppx) {
+    body .redactor-toolbar li a.re-embed i.icon {
+        background-image: url(../img/embed.png);
+        background-size: 25px;
+    }
+    body .redactor-toolbar li a.re-embed.redactor-act i.icon {
+        background-image: url(../img/embed.png);
+    }
+}
