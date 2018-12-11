@@ -31,6 +31,10 @@
         "handle": "embeds",
         "hasCpSettings": false,
         "hasCpSection": false,
+        "changelogUrl": "https://github.com/fork/embeds/blob/master/CHANGELOG.md",
+        "components": {
+            "embeds": "fork\\embeds\\services\\Embeds"
+        },
         "class": "fork\\embeds\\Embeds"
     }
 }

@@ -10,6 +10,7 @@
 
 namespace fork\embeds;
 
+use fork\embeds\services\Embeds as EmbedsService;
 
 use Craft;
 use craft\base\Plugin;
@@ -32,6 +33,7 @@ use yii\base\Event;
  * @package   Embeds
  * @since     1.0.0
  *
+ * @property  EmbedsService $embeds
  */
 class Embeds extends Plugin
 {

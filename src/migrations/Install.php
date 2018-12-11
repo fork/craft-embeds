@@ -27,6 +27,13 @@ class Install extends Migration
         // Find the 'Common' field group
         $group = FieldGroup::findOne(['name' => 'Common']);
 
+        // Check if the fields already exist
+        $embedsCopy = Craft::$app->fields->getFieldByHandle("embedsCopy");
+        $embedsMatrix = Craft::$app->fields->getFieldByHandle("embeds");
+        // TODO: Check if only one of the fields exists...
+        if ($embedsCopy && $embedsMatrix) {
+            return true;
+        }
         // Build a Redactor field
         $embedsCopy = new Field([
             "groupId" => $group->id,
