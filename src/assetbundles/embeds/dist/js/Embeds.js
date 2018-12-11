@@ -23,9 +23,9 @@
 var SetEmbeds = {
 	init: function() {
 		this.$matrixContainer = $('#fields-embeds-field .matrix-field');
-		this.$richtextContent = $('#fields-body-field .redactor-box .redactor-in');
+		this.$richtextContent = $('#fields-embedsCopy-field .redactor-box .redactor-in');
 
-        this.$editor = $R('#fields-body');
+        this.$editor = $R('#fields-embedsCopy');
 
 		// if article page
 		if(this.$matrixContainer.length && this.$richtextContent.length) {
