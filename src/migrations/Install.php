@@ -39,7 +39,9 @@ class Install extends Migration
             "groupId" => $group->id,
             "name" => "Embeds Copy",
             "handle" => "embedsCopy",
-            "instructions" => "Redactor copytext field for the Embeds plugin"
+            "instructions" => "Redactor copytext field for the Embeds plugin",
+            "availableVolumes" => [],
+            "availableTransforms" => []
         ]);
         // Attempt to save the field
         if (Craft::$app->fields->saveField($embedsCopy)) {
