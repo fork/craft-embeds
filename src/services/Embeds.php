@@ -147,6 +147,7 @@ class Embeds extends Component
                 case "craft\\fields\\Checkboxes":
                 case "craft\\fields\\Dropdown":
                 case "craft\\fields\\RadioButtons":
+                case "craft\\fields\\MultiSelect":
                     $data[$field->handle] = $block[$field->handle]->getOptions();
                     break;
                 case "craft\\fields\\Color":
