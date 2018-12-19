@@ -15,14 +15,18 @@ class Install extends Migration
 {
     /**
      * @inheritdoc
-     * @throws \Throwable
      */
     public function safeUp()
     {
         // See if Redactor is installed
         if (!Craft::$app->plugins->isPluginInstalled('redactor')) {
             // If not, try to install it
-            Craft::$app->plugins->installPlugin('redactor');
+            try {
+                Craft::$app->plugins->installPlugin('redactor');
+            } catch (\Throwable $thrwbl) {
+                echo "Couldn't install Redactor: " . $thrwbl->getMessage();
+                return false;
+            }
         }
         // Find the 'Common' field group
         $group = FieldGroup::findOne(['name' => 'Common']);
