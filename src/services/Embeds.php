@@ -29,7 +29,7 @@ class Embeds extends Component
      * @param Entry $entry
      * @return array
      */
-    public function getEmbedsForEntry(Entry $entry) : array
+    public function getEmbedsForEntry(Entry $entry): array
     {
         /** @var Field $embedsCopy */
         $embedsCopy = $entry->embedsCopy;
@@ -50,8 +50,9 @@ class Embeds extends Component
         $embedBlocks = [];
         /** @var MatrixBlock $embed */
         foreach ($embeds as $embed) {
+            $type = $embed->type->handle;
             $embedBlocks[] = [
-                'type' => $embed->type->handle,
+                'type' => $type,
                 'data' => $this->getMatrixBlockData($embed)
             ];
         }
@@ -71,15 +72,104 @@ class Embeds extends Component
      * @param MatrixBlock $block
      * @return array
      */
-    private function getMatrixBlockData(MatrixBlock $block) :array
+    private function getMatrixBlockData(MatrixBlock $block): array
     {
         $data = [];
         /** @var FieldLayout $fieldLayout */
         $fieldLayout = $block->fieldLayout;
         /** @var \craft\base\Field $field */
         foreach ($fieldLayout->getFields() as $field) {
-            $data[$field->handle] = $block[$field->handle];
+            switch (get_class($field)) {
+                case "craft\\fields\\Assets":
+                    $func = function ($x) {
+                        return [
+                            'id' => $x->id,
+                            'url' => $x->url,
+                            'height' => $x->height,
+                            'width' => $x->width,
+                            'status' => $x->status,
+                        ];
+                    };
+                    $data[$field->handle] = $this->transformData($func, $block[$field->handle]->all());
+                    break;
+                case "craft\\fields\\Categories":
+                    $func = function ($x) {
+                        return [
+                            'id' => $x->id,
+                            'title' => $x->title,
+                            'slug' => $x->slug,
+                            'status' => $x->status,
+                        ];
+                    };
+                    $data[$field->handle] = $this->transformData($func, $block[$field->handle]->all());
+                    break;
+
+                case "craft\\fields\\Entries":
+                    $func = function ($x) {
+                        return [
+                            'id' => $x->id,
+                            'title' => $x->title,
+                            'slug' => $x->slug,
+                            'uri' => $x->uri,
+                            'authorId' => $x->authorId,
+                            'postDate' => $x->postDate,
+                            'sectionId' => $x->sectionId,
+                            'dateCreated' => $x->dateCreated,
+                            'dateUpdated' => $x->dateUpdated,
+                        ];
+                    };
+                    $data[$field->handle] = $this->transformData($func, $block[$field->handle]->all());
+                    break;
+                case "craft\\fields\\Tags":
+                    $func = function ($x) {
+                        return [
+                            'id' => $x->id,
+                            'title' => $x->title,
+                            'slug' => $x->slug,
+                            'status' => $x->status
+                        ];
+                    };
+                    $data[$field->handle] = $this->transformData($func, $block[$field->handle]->all());
+                    break;
+                case "craft\\fields\\Users":
+                    $func = function ($x) {
+                        return [
+                            'id' => $x->id,
+                            'username' => $x->username,
+                            'fullName' => $x->fullName,
+                            'name' => $x->name,
+                            'email' => $x->email,
+                            'status' => $x->status
+                        ];
+                    };
+                    $data[$field->handle] = $this->transformData($func, $block[$field->handle]->all());
+                    break;
+                case "craft\\fields\\Checkboxes":
+                case "craft\\fields\\Dropdown":
+                case "craft\\fields\\RadioButtons":
+                    $data[$field->handle] = $block[$field->handle]->getOptions();
+                    break;
+                case "craft\\fields\\Color":
+                    $data[$field->handle] = [
+                        "hex" => $block[$field->handle]->getHex(),
+                        "rgb" => $block[$field->handle]->getRgb(),
+                        "luma" => $block[$field->handle]->getLuma(),
+                    ];
+                    break;
+                default:
+                    $data[$field->handle] = $block[$field->handle];
+                    break;
+            }
         }
         return $data;
+    }
+
+    private function transformData($func, $input)
+    {
+        $output = [];
+        foreach ($input as $data) {
+            $output[] = $func($data);
+        }
+        return $output;
     }
 }
