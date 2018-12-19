@@ -90,7 +90,7 @@ class Embeds extends Component
                             'status' => $x->status,
                         ];
                     };
-                    $data[$field->handle] = $this->transformData($func, $block[$field->handle]->all());
+                    $data[$field->handle] = array_map($func, $block[$field->handle]->all());
                     break;
                 case "craft\\fields\\Categories":
                     $func = function ($x) {
@@ -101,7 +101,7 @@ class Embeds extends Component
                             'status' => $x->status,
                         ];
                     };
-                    $data[$field->handle] = $this->transformData($func, $block[$field->handle]->all());
+                    $data[$field->handle] = array_map($func, $block[$field->handle]->all());
                     break;
 
                 case "craft\\fields\\Entries":
@@ -118,7 +118,7 @@ class Embeds extends Component
                             'dateUpdated' => $x->dateUpdated,
                         ];
                     };
-                    $data[$field->handle] = $this->transformData($func, $block[$field->handle]->all());
+                    $data[$field->handle] = array_map($func, $block[$field->handle]->all());
                     break;
                 case "craft\\fields\\Tags":
                     $func = function ($x) {
@@ -129,7 +129,7 @@ class Embeds extends Component
                             'status' => $x->status
                         ];
                     };
-                    $data[$field->handle] = $this->transformData($func, $block[$field->handle]->all());
+                    $data[$field->handle] = array_map($func, $block[$field->handle]->all());
                     break;
                 case "craft\\fields\\Users":
                     $func = function ($x) {
@@ -142,7 +142,7 @@ class Embeds extends Component
                             'status' => $x->status
                         ];
                     };
-                    $data[$field->handle] = $this->transformData($func, $block[$field->handle]->all());
+                    $data[$field->handle] = array_map($func, $block[$field->handle]->all());
                     break;
                 case "craft\\fields\\Checkboxes":
                 case "craft\\fields\\Dropdown":
@@ -163,14 +163,5 @@ class Embeds extends Component
             }
         }
         return $data;
-    }
-
-    private function transformData($func, $input)
-    {
-        $output = [];
-        foreach ($input as $data) {
-            $output[] = $func($data);
-        }
-        return $output;
     }
 }
