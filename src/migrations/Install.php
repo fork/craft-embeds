@@ -7,6 +7,7 @@ use craft\db\Migration;
 use craft\fields\Matrix;
 use craft\records\FieldGroup;
 use craft\redactor\Field;
+use fork\embeds\Embeds;
 
 /**
  * Install migration.
@@ -31,6 +32,9 @@ class Install extends Migration
         // Find the 'Common' field group
         $group = FieldGroup::findOne(['name' => 'Common']);
 
+        // Copy the Redactor settings file
+        copy(Embeds::$plugin->basePath . "/config/redactor/Embeds.json", Craft::$app->path->getConfigPath() . "/redactor/Embeds.json");
+
         // Check if the fields already exist
         $embedsCopy = Craft::$app->fields->getFieldByHandle("embedsCopy");
         $embedsMatrix = Craft::$app->fields->getFieldByHandle("embeds");
@@ -44,6 +48,7 @@ class Install extends Migration
             "name" => "Embeds Copy",
             "handle" => "embedsCopy",
             "instructions" => "Redactor copytext field for the Embeds plugin",
+            'redactorConfig' => "Embeds.json",
             "availableVolumes" => [],
             "availableTransforms" => []
         ]);

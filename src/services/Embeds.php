@@ -33,8 +33,8 @@ class Embeds extends Component
     {
         /** @var Field $embedsCopy */
         $embedsCopy = $entry->embedsCopy;
-        /** @var Matrix $embeds */
-        $embeds = $entry->embeds;
+        /** @var MatrixBlock[] $embeds */
+        $embeds = $entry->embeds->all();
 
         // Handle copy
         $embedsCopy = str_replace("\n", "", $embedsCopy);

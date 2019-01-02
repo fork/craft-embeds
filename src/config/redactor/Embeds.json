@@ -1,0 +1,5 @@
+{
+  "buttons": ["bold", "italic"],
+  "plugins": ["embed"],
+  "toolbarFixed": true
+}
