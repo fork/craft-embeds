@@ -10,11 +10,14 @@ namespace fork\embeds\services;
 
 use Craft;
 use craft\base\Component;
+use craft\base\Element;
+use craft\elements\Asset;
+use craft\elements\Category;
+use craft\elements\db\MatrixBlockQuery;
 use craft\elements\Entry;
 use craft\elements\MatrixBlock;
-use craft\fields\Matrix;
 use craft\models\FieldLayout;
-use craft\redactor\Field;
+use craft\redactor\FieldData;
 
 /**
  * Embeds Service
@@ -26,16 +29,12 @@ use craft\redactor\Field;
 class Embeds extends Component
 {
     /**
-     * @param Entry $entry
+     * @param string $embedsCopy
+     * @param MatrixBlock[] $embeds
      * @return array
      */
-    public function getEmbedsForEntry(Entry $entry): array
+    public function mergeEmbeds(string $embedsCopy, array $embeds): array
     {
-        /** @var Field $embedsCopy */
-        $embedsCopy = $entry->embedsCopy;
-        /** @var MatrixBlock[] $embeds */
-        $embeds = $entry->embeds->all();
-
         // Handle copy
         $embedsCopy = str_replace("\n", "", $embedsCopy);
         $embedsCopy = preg_replace('/<p><br \/><\/p>/', '', $embedsCopy);
@@ -53,7 +52,7 @@ class Embeds extends Component
             $type = $embed->type->handle;
             $embedBlocks[] = [
                 'type' => $type,
-                'data' => $this->getMatrixBlockData($embed)
+                'data' => $this->getElementData($embed)
             ];
         }
 
@@ -69,97 +68,117 @@ class Embeds extends Component
     }
 
     /**
-     * @param MatrixBlock $block
+     * @param Element $element
      * @return array
      */
-    private function getMatrixBlockData(MatrixBlock $block): array
+    public function getElementData(Element $element): array
     {
-        $data = [];
+        // Handle different element types and set their specific attributes
+        switch (get_class($element)) {
+            case "craft\\elements\\Asset":
+                /** @var Asset $element */
+                $data = [
+                    'id' => $element->id,
+                    'title' => $element->title,
+                    'status' => $element->status,
+                    'src' => $element->getUrl(),
+                    'height' => $element->height,
+                    'width' => $element->width,
+                    'srcset' => []
+                ];
+                break;
+
+            case "craft\\elements\\Category":
+                /** @var Category $element */
+                $data = [
+                    'id' => $element->id,
+                    'title' => $element->title,
+                    'slug' => $element->slug,
+                    'status' => $element->status,
+                ];
+                break;
+
+            case "craft\\elements\\Entry":
+                /** @var Entry $element */
+                $data = [
+                    'id' => $element->id,
+                    'title' => $element->title,
+                    'slug' => $element->slug,
+                    'status' => $element->status,
+                    'authorId' => $element->author->id,
+                    'postDate' => $element->postDate->getTimestamp(),
+                    'section' => $element->section->handle,
+                    'dateCreated' => $element->dateCreated->getTimestamp(),
+                    'dateUpdated' => $element->dateUpdated->getTimestamp()
+                ];
+                break;
+
+            default:
+                $data = [];
+                break;
+        }
+        if ($element->embeds && $element->embedsCopy) {
+            /** @var FieldData $copy */
+            $copy = $element->embedsCopy;
+            /** @var MatrixBlockQuery $embeds */
+            $embeds = $element->embeds;
+            $data['embeds'] = $this->mergeEmbeds($copy->getRawContent(), $embeds->all());
+        }
+
         /** @var FieldLayout $fieldLayout */
-        $fieldLayout = $block->fieldLayout;
+        $fieldLayout = $element->fieldLayout;
         /** @var \craft\base\Field $field */
         foreach ($fieldLayout->getFields() as $field) {
-            switch (get_class($field)) {
-                case "craft\\fields\\Assets":
-                    $func = function ($x) {
-                        return [
-                            'id' => $x->id,
-                            'url' => $x->url,
-                            'height' => $x->height,
-                            'width' => $x->width,
-                            'status' => $x->status,
+            // Embeds specific fields are getting special treatment
+            if (!in_array($field->handle, ["embeds", "embedsCopy"])) {
+                switch (get_class($field)) {
+                    case "craft\\fields\\Assets":
+                    case "craft\\fields\\Categories":
+                    case "craft\\fields\\Entries":
+                    case "craft\\fields\\Matrix":
+                        $data[$field->handle] = array_map([$this, 'getElementData'], $element[$field->handle]->all());
+                        break;
+                    case "craft\\fields\\Tags":
+                        $func = function ($x) {
+                            return [
+                                'id' => $x->id,
+                                'title' => $x->title,
+                                'slug' => $x->slug,
+                                'status' => $x->status
+                            ];
+                        };
+                        $data[$field->handle] = array_map($func, $element[$field->handle]->all());
+                        break;
+                    case "craft\\fields\\Users":
+                        $func = function ($x) {
+                            return [
+                                'id' => $x->id,
+                                'username' => $x->username,
+                                'fullName' => $x->fullName,
+                                'name' => $x->name,
+                                'email' => $x->email,
+                                'status' => $x->status
+                            ];
+                        };
+                        $data[$field->handle] = array_map($func, $element[$field->handle]->all());
+                        break;
+                    case "craft\\fields\\Checkboxes":
+                    case "craft\\fields\\Dropdown":
+                    case "craft\\fields\\RadioButtons":
+                    case "craft\\fields\\MultiSelect":
+                        $data[$field->handle] = $element[$field->handle]->getOptions();
+                        break;
+                    case "craft\\fields\\Color":
+                        $data[$field->handle] = [
+                            "hex" => $element[$field->handle]->getHex(),
+                            "rgb" => $element[$field->handle]->getRgb(),
+                            "luma" => $element[$field->handle]->getLuma(),
                         ];
-                    };
-                    $data[$field->handle] = array_map($func, $block[$field->handle]->all());
-                    break;
-                case "craft\\fields\\Categories":
-                    $func = function ($x) {
-                        return [
-                            'id' => $x->id,
-                            'title' => $x->title,
-                            'slug' => $x->slug,
-                            'status' => $x->status,
-                        ];
-                    };
-                    $data[$field->handle] = array_map($func, $block[$field->handle]->all());
-                    break;
-
-                case "craft\\fields\\Entries":
-                    $func = function ($x) {
-                        return [
-                            'id' => $x->id,
-                            'title' => $x->title,
-                            'slug' => $x->slug,
-                            'uri' => $x->uri,
-                            'authorId' => $x->authorId,
-                            'postDate' => $x->postDate,
-                            'sectionId' => $x->sectionId,
-                            'dateCreated' => $x->dateCreated,
-                            'dateUpdated' => $x->dateUpdated,
-                        ];
-                    };
-                    $data[$field->handle] = array_map($func, $block[$field->handle]->all());
-                    break;
-                case "craft\\fields\\Tags":
-                    $func = function ($x) {
-                        return [
-                            'id' => $x->id,
-                            'title' => $x->title,
-                            'slug' => $x->slug,
-                            'status' => $x->status
-                        ];
-                    };
-                    $data[$field->handle] = array_map($func, $block[$field->handle]->all());
-                    break;
-                case "craft\\fields\\Users":
-                    $func = function ($x) {
-                        return [
-                            'id' => $x->id,
-                            'username' => $x->username,
-                            'fullName' => $x->fullName,
-                            'name' => $x->name,
-                            'email' => $x->email,
-                            'status' => $x->status
-                        ];
-                    };
-                    $data[$field->handle] = array_map($func, $block[$field->handle]->all());
-                    break;
-                case "craft\\fields\\Checkboxes":
-                case "craft\\fields\\Dropdown":
-                case "craft\\fields\\RadioButtons":
-                case "craft\\fields\\MultiSelect":
-                    $data[$field->handle] = $block[$field->handle]->getOptions();
-                    break;
-                case "craft\\fields\\Color":
-                    $data[$field->handle] = [
-                        "hex" => $block[$field->handle]->getHex(),
-                        "rgb" => $block[$field->handle]->getRgb(),
-                        "luma" => $block[$field->handle]->getLuma(),
-                    ];
-                    break;
-                default:
-                    $data[$field->handle] = $block[$field->handle];
-                    break;
+                        break;
+                    default:
+                        $data[$field->handle] = $element[$field->handle];
+                        break;
+                }
             }
         }
         return $data;
