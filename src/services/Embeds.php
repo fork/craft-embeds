@@ -16,6 +16,7 @@ use craft\elements\Category;
 use craft\elements\db\MatrixBlockQuery;
 use craft\elements\Entry;
 use craft\elements\MatrixBlock;
+use craft\fields\data\SingleOptionFieldData;
 use craft\fields\Date;
 use craft\models\FieldLayout;
 use craft\redactor\FieldData;
@@ -136,6 +137,13 @@ class Embeds extends Component
                     case "craft\\fields\\Assets":
                     case "craft\\fields\\Categories":
                     case "craft\\fields\\Entries":
+                        if ($field->limit && $field->limit == 1) {
+                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one()) : null;
+                        } else {
+                            $data[$field->handle] = array_map([$this, 'getElementData'], $element[$field->handle]->all());
+                        }
+                        break;
+
                     case "craft\\fields\\Matrix":
                         $data[$field->handle] = array_map([$this, 'getElementData'], $element[$field->handle]->all());
                         break;
@@ -167,10 +175,13 @@ class Embeds extends Component
                         break;
 
                     case "craft\\fields\\Checkboxes":
+                    case "craft\\fields\\MultiSelect":
+                        $data[$field->handle] = array_map(function($item) { return $item->value; }, $element[$field->handle]->getArrayCopy());
+                        break;
+
                     case "craft\\fields\\Dropdown":
                     case "craft\\fields\\RadioButtons":
-                    case "craft\\fields\\MultiSelect":
-                        $data[$field->handle] = $element[$field->handle]->getOptions();
+                        $data[$field->handle] = $element[$field->handle]->value;
                         break;
 
                     case "craft\\fields\\Date":
