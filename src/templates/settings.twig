@@ -1,0 +1,20 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * @author    Fork Unstable Media GmbH
+ * @copyright Copyright (c) 2018 Fork Unstable Media GmbH
+ * @link      https://www.fork.de/
+ * @package   Embeds
+ * @since     1.0.1
+ */
+#}
+
+{% import "_includes/forms" as forms %}
+
+{{ forms.textField({
+    label: 'Test',
+    instructions: 'Test',
+    id: 'fieldToImageTransformMapping',
+    name: 'fieldToImageTransformMapping',
+    value: settings['fieldToImageTransformMapping']})
+}}

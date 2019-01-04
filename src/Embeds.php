@@ -10,6 +10,7 @@
 
 namespace fork\embeds;
 
+use fork\embeds\models\Settings;
 use fork\embeds\services\Embeds as EmbedsService;
 
 use Craft;
@@ -34,6 +35,8 @@ use yii\base\Event;
  * @since     1.0.0
  *
  * @property  EmbedsService $embeds
+ * @property  Settings $settings
+ * @method    Settings getSettings()
  */
 class Embeds extends Plugin
 {
@@ -124,4 +127,34 @@ class Embeds extends Plugin
     // Protected Methods
     // =========================================================================
 
+    // Protected Methods
+    // =========================================================================
+
+    /**
+     * Creates and returns the model used to store the plugin’s settings.
+     *
+     * @return \craft\base\Model|null
+     */
+    protected function createSettingsModel()
+    {
+        return new Settings();
+    }
+
+    /**
+     * Returns the rendered settings HTML, which will be inserted into the content
+     * block on the settings page.
+     *
+     * @return string The rendered settings HTML
+     * @throws \Twig_Error_Loader
+     * @throws \yii\base\Exception
+     */
+    protected function settingsHtml(): string
+    {
+        return Craft::$app->view->renderTemplate(
+            'embeds/settings',
+            [
+                'settings' => $this->getSettings()
+            ]
+        );
+    }
 }
