@@ -16,6 +16,7 @@ use craft\elements\Category;
 use craft\elements\db\MatrixBlockQuery;
 use craft\elements\Entry;
 use craft\elements\MatrixBlock;
+use craft\fields\Date;
 use craft\models\FieldLayout;
 use craft\redactor\FieldData;
 
@@ -138,6 +139,7 @@ class Embeds extends Component
                     case "craft\\fields\\Matrix":
                         $data[$field->handle] = array_map([$this, 'getElementData'], $element[$field->handle]->all());
                         break;
+
                     case "craft\\fields\\Tags":
                         $func = function ($x) {
                             return [
@@ -149,6 +151,7 @@ class Embeds extends Component
                         };
                         $data[$field->handle] = array_map($func, $element[$field->handle]->all());
                         break;
+
                     case "craft\\fields\\Users":
                         $func = function ($x) {
                             return [
@@ -162,12 +165,20 @@ class Embeds extends Component
                         };
                         $data[$field->handle] = array_map($func, $element[$field->handle]->all());
                         break;
+
                     case "craft\\fields\\Checkboxes":
                     case "craft\\fields\\Dropdown":
                     case "craft\\fields\\RadioButtons":
                     case "craft\\fields\\MultiSelect":
                         $data[$field->handle] = $element[$field->handle]->getOptions();
                         break;
+
+                    case "craft\\fields\\Date":
+                        /** @var \DateTime $date */
+                        $date = $element[$field->handle];
+                        $data[$field->handle] = $date->getTimestamp();
+                        break;
+
                     case "craft\\fields\\Color":
                         $data[$field->handle] = [
                             "hex" => $element[$field->handle]->getHex(),
@@ -175,6 +186,7 @@ class Embeds extends Component
                             "luma" => $element[$field->handle]->getLuma(),
                         ];
                         break;
+
                     default:
                         $data[$field->handle] = $element[$field->handle];
                         break;
