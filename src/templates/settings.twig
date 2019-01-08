@@ -28,11 +28,37 @@
         value: field.fieldId
     }) }}
 
-    {{ forms.checkboxGroupField({
+    {#{{ forms.checkboxGroupField({#}
+        {#label: field.name,#}
+        {#instructions: 'Select the image transforms to use for this field',#}
+        {#id: field.handle,#}
+        {#name: 'fieldToImageTransformMapping' ~ '[' ~ loop.index ~ ']' ~ '[transforms]',#}
+        {#options: field.transforms#}
+    {#}) }}#}
+
+    {{ forms.editableTableField({
         label: field.name,
-        instructions: 'Select the image transforms to use for this field',
+        instructions: "Configure the image transforms to use for this field",
         id: field.handle,
         name: 'fieldToImageTransformMapping' ~ '[' ~ loop.index ~ ']' ~ '[transforms]',
-        options: field.transforms
+        cols: {
+            "srcset": {
+                heading: "Srcset",
+                info: "Enter any handle here to group the transforms into multiple subgroups.",
+                type: "singleline",
+            },
+            "transformId": {
+                heading: "Transform",
+                info: "Select the transform you want to include for this field.",
+                type: "select",
+                options: transforms
+            },
+            "suffix": {
+                heading: "Suffix",
+                info: "Enter any valid suffix.",
+                type: "singleline"
+            },
+        },
+        rows: field.rows
     }) }}
 {% endfor %}

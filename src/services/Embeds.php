@@ -82,10 +82,13 @@ class Embeds extends Component
             case "craft\\elements\\Asset":
                 /** @var Asset $element */
                 $srcset = [];
-                foreach ($transforms as $transformId) {
-                    $transform = Craft::$app->assetTransforms->getTransformById($transformId);
+                foreach ($transforms as $transformSettings) {
+                    $transform = Craft::$app->assetTransforms->getTransformById($transformSettings['transformId']);
                     if ($transform) {
-                        $srcset[] = $element->getUrl($transform->handle);
+                        $srcset[$transformSettings['srcset']][] = [
+                            'src' => $element->getUrl($transform->handle),
+                            'suffix' => $transformSettings['suffix']
+                        ];
                     }
                 }
 

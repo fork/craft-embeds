@@ -22,22 +22,26 @@ class Settings extends Model
      *      [
      *          'fieldID' => fieldId1,
      *          'transforms' => [
-     *              transformId1,
-     *              transformId2
+     *              [
+     *                  'srcset' => "",
+     *                  'transform' => transformId1,
+     *                  'suffix' => ""
+     *              ],
+     *              [
+     *                  'srcset' => "",
+     *                  'transform' => transformId2,
+     *                  'suffix' => ""
+     *              ]
      *          ]
      *      ],
      *      [
      *          'fieldID' => fieldId2,
      *          'transforms' => [
-     *              transformId1,
-     *              transformId2,
-     *              transformId3,
-     *          ]
-     *      ],
-     *      [
-     *          'fieldID' => fieldId3,
-     *          'transforms' => [
-     *              transformId3,
+     *              [
+     *                  'srcset' => "",
+     *                  'transform' => transformId1,
+     *                  'suffix' => ""
+     *              ]
      *          ]
      *      ]
      * ]

@@ -152,7 +152,6 @@ class Embeds extends Plugin
      */
     protected function settingsHtml(): string
     {
-        $imageTransforms = Craft::$app->assetTransforms->getAllTransforms();
         /** @var Matrix $embedsField */
         $embedsField = Craft::$app->fields->getFieldByHandle("embeds");
         $embedsBlocks = $embedsField->getBlockTypes();
@@ -164,22 +163,13 @@ class Embeds extends Plugin
                     /** @var Assets $field */
                     // 'allowedKinds' is either null (no restriction) or an array of allowed file types
                     if (!$field->allowedKinds || in_array("image", $field->allowedKinds)) {
-                        $currentFieldSettings = $currentSettings->getSettingsByFieldId($field->id);
-                        $transforms = [];
-                        foreach ($imageTransforms as $transform) {
-                            $transforms[] = [
-                                'label' => $transform->name,
-                                'value' => $transform->id,
-                                'checked' => array_key_exists('transforms', $currentFieldSettings) ? in_array($transform->id, $currentFieldSettings['transforms']) : false
-                            ];
-                        }
-
+                        $fieldSettings = $currentSettings->getSettingsByFieldId($field->id);
                         $settings[] = [
                             'name' => $block->name . ' > ' . $field->name,
                             'handle' => $block->handle . '_' . $field->handle,
                             'fieldId' => $field->id,
                             'matrixBlockId' => $block->id,
-                            'transforms' => $transforms
+                            'rows' => array_key_exists('transforms', $fieldSettings) ? $fieldSettings['transforms'] : []
                         ];
                     }
                 }
@@ -189,7 +179,16 @@ class Embeds extends Plugin
         return Craft::$app->view->renderTemplate(
             'embeds/settings',
             [
-                'settings' => $settings
+                'settings' => $settings,
+                'transforms' => array_map(
+                    function($transform) {
+                        return [
+                            'label' => $transform->name,
+                            'value' => $transform->id
+                        ];
+                    },
+                    Craft::$app->assetTransforms->getAllTransforms()
+                )
             ]
         );
     }
