@@ -11,23 +11,6 @@
 
 {% import "_includes/forms" as forms %}
 
-{# Get all transforms #}
-{% set imageTransforms = craft.app.getAssetTransforms.getAllTransforms() %}
-{% set options = [] %}
-{% for transform in imageTransforms %}
-    {% set options = options|merge([{
-        label: transform.name,
-        value: transform.handle
-    }]) %}
-{% endfor %}
-
-{# Get all image fields in embeds #}
-{% set embedsField = craft.app.fields.getFieldByHandle("embeds").blockTypes %}
-
-{% for blockType in embedsField %}
-            {{ dump(blockType.fieldLayout.fields) }}
-{% endfor %}
-
 {#
 {{ forms.textField({
     label: 'Test',
@@ -38,10 +21,18 @@
 }}
 #}
 
-{{ forms.checkboxGroupField({
-    label: 'Transforms',
-    instructions: 'Select',
-    id: 'transformsSelect',
-    name: 'transformsSelect',
-    options: options
-}) }}
+{% for handle, field in settings %}
+    {{ forms.hidden({
+        id: ['fieldToImageTransformMapping', 'fieldId', field.fieldId]|join('_'),
+        name: 'fieldToImageTransformMapping' ~ '[' ~ loop.index ~ ']' ~ '[fieldId]',
+        value: field.fieldId
+    }) }}
+
+    {{ forms.checkboxGroupField({
+        label: field.name,
+        instructions: 'Select the image transforms to use for this field',
+        id: field.handle,
+        name: 'fieldToImageTransformMapping' ~ '[' ~ loop.index ~ ']' ~ '[transforms]',
+        options: field.transforms
+    }) }}
+{% endfor %}

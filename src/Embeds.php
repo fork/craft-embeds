@@ -10,6 +10,8 @@
 
 namespace fork\embeds;
 
+use craft\fields\Assets;
+use craft\fields\Matrix;
 use fork\embeds\models\Settings;
 use fork\embeds\services\Embeds as EmbedsService;
 
@@ -150,10 +152,54 @@ class Embeds extends Plugin
      */
     protected function settingsHtml(): string
     {
+        $imageTransforms = Craft::$app->assetTransforms->getAllTransforms();
+        /** @var Matrix $embedsField */
+        $embedsField = Craft::$app->fields->getFieldByHandle("embeds");
+        $embedsBlocks = $embedsField->getBlockTypes();
+        $currentSettings = $this->getSettings();
+        $settings = [];
+        foreach ($embedsBlocks as $block) {
+            foreach ($block->getFields() as $field) {
+                if (get_class($field) == Assets::class) {
+                    /** @var Assets $field */
+                    // 'allowedKinds' is either null (no restriction) or an array of allowed file types
+                    if (!$field->allowedKinds || in_array("image", $field->allowedKinds)) {
+                        $currentFieldSettings = $currentSettings->getSettingsByFieldId($field->id);
+                        $transforms = [];
+                        foreach ($imageTransforms as $transform) {
+                            $transforms[] = [
+                                'label' => $transform->name,
+                                'value' => $transform->id,
+                                'checked' => in_array($transform->id, $currentFieldSettings['transforms'])
+                            ];
+                        }
+
+                        $settings[] = [
+                            'name' => $block->name . ' > ' . $field->name,
+                            'handle' => $block->handle . '_' . $field->handle,
+                            'fieldId' => $field->id,
+                            'matrixBlockId' => $block->id,
+                            'transforms' => $transforms
+                        ];
+                    }
+                }
+            }
+        }
+
+        foreach ($this->getSettings()->fieldToImageTransformMapping as $fieldSettings) {
+            foreach ($settings as $field) {
+                if ($field['fieldId'] == $fieldSettings['fieldId']) {
+                    foreach ($field['transforms'] as $transform) {
+
+                    }
+                }
+            }
+        }
+
         return Craft::$app->view->renderTemplate(
             'embeds/settings',
             [
-                'settings' => $this->getSettings()
+                'settings' => $settings
             ]
         );
     }
