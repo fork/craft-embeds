@@ -21,6 +21,8 @@ use craft\fields\Date;
 use craft\models\FieldLayout;
 use craft\redactor\FieldData;
 
+use fork\embeds\Embeds as EmbedsPlugin;
+
 /**
  * Embeds Service
  *
@@ -73,20 +75,28 @@ class Embeds extends Component
      * @param Element $element
      * @return array
      */
-    public function getElementData(Element $element): array
+    public function getElementData(Element $element, array $transforms = []): array
     {
         // Handle different element types and set their specific attributes
         switch (get_class($element)) {
             case "craft\\elements\\Asset":
                 /** @var Asset $element */
+                $srcset = [];
+                foreach ($transforms as $transformId) {
+                    $transform = Craft::$app->assetTransforms->getTransformById($transformId);
+                    if ($transform) {
+                        $srcset[] = $element->getUrl($transform->handle);
+                    }
+                }
+
                 $data = [
                     'id' => $element->id,
                     'title' => $element->title,
                     'status' => $element->status,
                     'src' => $element->getUrl(),
+                    'srcset' => $srcset,
                     'height' => $element->height,
                     'width' => $element->width,
-                    'srcset' => []
                 ];
                 break;
 
@@ -135,6 +145,18 @@ class Embeds extends Component
             if (!in_array($field->handle, ["embeds", "embedsCopy"])) {
                 switch (get_class($field)) {
                     case "craft\\fields\\Assets":
+                        $fieldSettings = EmbedsPlugin::$plugin->settings->getSettingsByFieldId($field->id);
+                        $transforms = array_key_exists("transforms", $fieldSettings) ? $fieldSettings['transforms'] : [];
+                        if ($field->limit && $field->limit == 1) {
+                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), $transforms) : null;
+                        } else {
+                            $data[$field->handle] = [];
+                            foreach ($element[$field->handle]->all() as $asset) {
+                                $data[$field->handle][] = $this->getElementData($asset, $transforms);
+                            }
+                        }
+                        break;
+
                     case "craft\\fields\\Categories":
                     case "craft\\fields\\Entries":
                         if ($field->limit && $field->limit == 1) {
