@@ -170,7 +170,7 @@ class Embeds extends Plugin
                             $transforms[] = [
                                 'label' => $transform->name,
                                 'value' => $transform->id,
-                                'checked' => in_array($transform->id, $currentFieldSettings['transforms'])
+                                'checked' => array_key_exists('transforms', $currentFieldSettings) ? in_array($transform->id, $currentFieldSettings['transforms']) : false
                             ];
                         }
 
@@ -181,16 +181,6 @@ class Embeds extends Plugin
                             'matrixBlockId' => $block->id,
                             'transforms' => $transforms
                         ];
-                    }
-                }
-            }
-        }
-
-        foreach ($this->getSettings()->fieldToImageTransformMapping as $fieldSettings) {
-            foreach ($settings as $field) {
-                if ($field['fieldId'] == $fieldSettings['fieldId']) {
-                    foreach ($field['transforms'] as $transform) {
-
                     }
                 }
             }
