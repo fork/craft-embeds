@@ -11,6 +11,24 @@
 
 {% import "_includes/forms" as forms %}
 
+{# Get all transforms #}
+{% set imageTransforms = craft.app.getAssetTransforms.getAllTransforms() %}
+{% set options = [] %}
+{% for transform in imageTransforms %}
+    {% set options = options|merge([{
+        label: transform.name,
+        value: transform.handle
+    }]) %}
+{% endfor %}
+
+{# Get all image fields in embeds #}
+{% set embedsField = craft.app.fields.getFieldByHandle("embeds").blockTypes %}
+
+{% for blockType in embedsField %}
+            {{ dump(blockType.fieldLayout.fields) }}
+{% endfor %}
+
+{#
 {{ forms.textField({
     label: 'Test',
     instructions: 'Test',
@@ -18,3 +36,12 @@
     name: 'fieldToImageTransformMapping',
     value: settings['fieldToImageTransformMapping']})
 }}
+#}
+
+{{ forms.checkboxGroupField({
+    label: 'Transforms',
+    instructions: 'Select',
+    id: 'transformsSelect',
+    name: 'transformsSelect',
+    options: options
+}) }}

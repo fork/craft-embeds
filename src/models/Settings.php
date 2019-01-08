@@ -14,7 +14,7 @@ use fork\embeds\Embeds;
 class Settings extends Model
 {
     /**
-     * @var string $fieldToImageTransformMapping
+     * @var array $fieldToImageTransformMapping
      */
     public $fieldToImageTransformMapping = '';
 
@@ -24,7 +24,7 @@ class Settings extends Model
     public function rules()
     {
         return [
-            ['fieldToImageTransformMapping', 'string']
+            ['fieldToImageTransformMapping', 'array']
         ];
     }
 }
