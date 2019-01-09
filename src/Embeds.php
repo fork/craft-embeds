@@ -10,16 +10,16 @@
 
 namespace fork\embeds;
 
-use craft\fields\Assets;
-use craft\fields\Matrix;
-use fork\embeds\models\Settings;
-use fork\embeds\services\Embeds as EmbedsService;
-
 use Craft;
 use craft\base\Plugin;
-use craft\redactor\Field;
-
+use craft\fields\Assets;
+use craft\fields\Matrix;
+use craft\models\MatrixBlockType;
+use craft\redactor\Field as RedactorField;
+use craft\records\Field as FieldRecord;
 use fork\embeds\assetbundles\Embeds\EmbedsAsset;
+use fork\embeds\models\Settings;
+use fork\embeds\services\Embeds as EmbedsService;
 use yii\base\Event;
 
 /**
@@ -89,8 +89,8 @@ class Embeds extends Plugin
         }
 
         Event::on(
-            Field::class,
-            Field::EVENT_REGISTER_PLUGIN_PATHS,
+            RedactorField::class,
+            RedactorField::EVENT_REGISTER_PLUGIN_PATHS,
             function (Event $event) {
                 // add redactor embed plugin assets to load paths
                 $event->paths[] = dirname(__DIR__).'/src/assetbundles/embeds/dist/redactor-plugin';
@@ -152,27 +152,45 @@ class Embeds extends Plugin
      */
     protected function settingsHtml(): string
     {
+        $allImageFields = FieldRecord::find()->where(['type' => Assets::class])->all();
+
+
         /** @var Matrix $embedsField */
-        $embedsField = Craft::$app->fields->getFieldByHandle("embeds");
-        $embedsBlocks = $embedsField->getBlockTypes();
         $currentSettings = $this->getSettings();
         $settings = [];
-        foreach ($embedsBlocks as $block) {
-            foreach ($block->getFields() as $field) {
-                if (get_class($field) == Assets::class) {
-                    /** @var Assets $field */
-                    // 'allowedKinds' is either null (no restriction) or an array of allowed file types
-                    if (!$field->allowedKinds || in_array("image", $field->allowedKinds)) {
-                        $fieldSettings = $currentSettings->getSettingsByFieldId($field->id);
-                        $settings[] = [
-                            'name' => $block->name . ' > ' . $field->name,
-                            'handle' => $block->handle . '_' . $field->handle,
-                            'fieldId' => $field->id,
-                            'matrixBlockId' => $block->id,
-                            'rows' => array_key_exists('transforms', $fieldSettings) ? $fieldSettings['transforms'] : []
-                        ];
-                    }
+        foreach ($allImageFields as $field) {
+            /** @var Assets $field -- Get the Field, not the Record */
+            $field = Craft::$app->fields->getFieldById($field->id);
+            // 'allowedKinds' is either null (no restriction) or an array of allowed file types
+            if (!$field->allowedKinds || in_array("image", $field->allowedKinds)) {
+                $fieldSettings = $currentSettings->getSettingsByFieldId($field->id);
+
+                // Get the field's context
+                $context = explode(":", $field->context);
+                switch ($context[0]) {
+                    case "matrixBlockType":
+                        $id = $context[1];
+                        /** @var MatrixBlockType $blockType */
+                        $blockType = Craft::$app->matrix->getBlockTypeById($id);
+                        /** @var Matrix $matrixField */
+                        $matrixField = Craft::$app->fields->getFieldById($blockType->fieldId);
+                        $fieldName = join(" > ", [$matrixField->name, $blockType->name, $field->name]);
+                        $fieldHandle = join("_", [$matrixField->handle, $blockType->handle, $field->handle]);
+                        break;
+
+                    // a.k.a. 'global', standalone field
+                    default:
+                        $fieldName = $field->name;
+                        $fieldHandle = $field->handle;
+
                 }
+
+                $settings[] = [
+                    'name' => $fieldName,
+                    'handle' => $fieldHandle,
+                    'fieldId' => $field->id,
+                    'rows' => array_key_exists('transforms', $fieldSettings) ? $fieldSettings['transforms'] : []
+                ];
             }
         }
 
