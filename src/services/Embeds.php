@@ -16,8 +16,19 @@ use craft\elements\Category;
 use craft\elements\db\MatrixBlockQuery;
 use craft\elements\Entry;
 use craft\elements\MatrixBlock;
+use craft\fields\Assets;
+use craft\fields\Categories;
+use craft\fields\Checkboxes;
+use craft\fields\Color;
 use craft\fields\data\SingleOptionFieldData;
 use craft\fields\Date;
+use craft\fields\Dropdown;
+use craft\fields\Entries;
+use craft\fields\Matrix;
+use craft\fields\MultiSelect;
+use craft\fields\RadioButtons;
+use craft\fields\Tags;
+use craft\fields\Users;
 use craft\models\FieldLayout;
 use craft\redactor\FieldData;
 
@@ -73,13 +84,14 @@ class Embeds extends Component
 
     /**
      * @param Element $element
+     * @param array $transforms
      * @return array
      */
     public function getElementData(Element $element, array $transforms = []): array
     {
         // Handle different element types and set their specific attributes
         switch (get_class($element)) {
-            case "craft\\elements\\Asset":
+            case Asset::class:
                 /** @var Asset $element */
                 $srcset = [];
                 foreach ($transforms as $transformSettings) {
@@ -103,7 +115,7 @@ class Embeds extends Component
                 ];
                 break;
 
-            case "craft\\elements\\Category":
+            case Category::class:
                 /** @var Category $element */
                 $data = [
                     'id' => $element->id,
@@ -113,7 +125,7 @@ class Embeds extends Component
                 ];
                 break;
 
-            case "craft\\elements\\Entry":
+            case Entry::class:
                 /** @var Entry $element */
                 $data = [
                     'id' => $element->id,
@@ -147,7 +159,7 @@ class Embeds extends Component
             // Embeds specific fields are getting special treatment
             if (!in_array($field->handle, ["embeds", "embedsCopy"])) {
                 switch (get_class($field)) {
-                    case "craft\\fields\\Assets":
+                    case Assets::class:
                         $fieldSettings = EmbedsPlugin::$plugin->settings->getSettingsByFieldId($field->id);
                         $transforms = array_key_exists("transforms", $fieldSettings) ? $fieldSettings['transforms'] : [];
                         if ($field->limit && $field->limit == 1) {
@@ -160,8 +172,8 @@ class Embeds extends Component
                         }
                         break;
 
-                    case "craft\\fields\\Categories":
-                    case "craft\\fields\\Entries":
+                    case Categories::class:
+                    case Entries::class:
                         if ($field->limit && $field->limit == 1) {
                             $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one()) : null;
                         } else {
@@ -169,11 +181,11 @@ class Embeds extends Component
                         }
                         break;
 
-                    case "craft\\fields\\Matrix":
+                    case Matrix::class:
                         $data[$field->handle] = array_map([$this, 'getElementData'], $element[$field->handle]->all());
                         break;
 
-                    case "craft\\fields\\Tags":
+                    case Tags::class:
                         $func = function ($x) {
                             return [
                                 'id' => $x->id,
@@ -185,7 +197,7 @@ class Embeds extends Component
                         $data[$field->handle] = array_map($func, $element[$field->handle]->all());
                         break;
 
-                    case "craft\\fields\\Users":
+                    case Users::class:
                         $func = function ($x) {
                             return [
                                 'id' => $x->id,
@@ -199,23 +211,23 @@ class Embeds extends Component
                         $data[$field->handle] = array_map($func, $element[$field->handle]->all());
                         break;
 
-                    case "craft\\fields\\Checkboxes":
-                    case "craft\\fields\\MultiSelect":
+                    case Checkboxes::class:
+                    case MultiSelect::class:
                         $data[$field->handle] = array_map(function($item) { return $item->value; }, $element[$field->handle]->getArrayCopy());
                         break;
 
-                    case "craft\\fields\\Dropdown":
-                    case "craft\\fields\\RadioButtons":
+                    case Dropdown::class:
+                    case RadioButtons::class:
                         $data[$field->handle] = $element[$field->handle]->value;
                         break;
 
-                    case "craft\\fields\\Date":
+                    case Date::class:
                         /** @var \DateTime $date */
                         $date = $element[$field->handle];
                         $data[$field->handle] = $date->getTimestamp();
                         break;
 
-                    case "craft\\fields\\Color":
+                    case Color::class:
                         $data[$field->handle] = [
                             "hex" => $element[$field->handle]->getHex(),
                             "rgb" => $element[$field->handle]->getRgb(),
