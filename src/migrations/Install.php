@@ -8,6 +8,7 @@ use craft\fields\Matrix;
 use craft\records\FieldGroup;
 use craft\redactor\Field;
 use fork\embeds\Embeds;
+use yii\base\Exception;
 
 /**
  * Install migration.
@@ -33,7 +34,12 @@ class Install extends Migration
         $group = FieldGroup::findOne(['name' => 'Common']);
 
         // Copy the Redactor settings file
-        copy(Embeds::$plugin->basePath . "/config/redactor/Embeds.json", Craft::$app->path->getConfigPath() . "/redactor/Embeds.json");
+        try {
+            copy(Embeds::$plugin->basePath . "/config/redactor/Embeds.json", Craft::$app->path->getConfigPath() . "/redactor/Embeds.json");
+        } catch (Exception $e) {
+            echo "Couldn't get Config Path:\n" . $e->getMessage();
+            return false;
+        }
 
         // Check if the fields already exist
         $embedsCopy = Craft::$app->fields->getFieldByHandle("embedsCopy");
@@ -47,23 +53,35 @@ class Install extends Migration
             "groupId" => $group->id,
             "name" => "Embeds Copy",
             "handle" => "embedsCopy",
+            "translationMethod" => "language",
             "instructions" => "Redactor copytext field for the Embeds plugin",
-            'redactorConfig' => "Embeds.json",
+            "redactorConfig" => "Embeds.json",
             "availableVolumes" => [],
             "availableTransforms" => []
         ]);
-        // Attempt to save the field
-        if (Craft::$app->fields->saveField($embedsCopy)) {
-            // Create a minimal matrix field with the required handle
-            $embedsMatrix = new Matrix([
-                "groupId" => $group->id,
-                "name" => "Embeds",
-                "handle" => "embeds",
-                "instructions" => "Embeds for the Redactor content"
-            ]);
+        try {
             // Attempt to save the field
-            return (Craft::$app->fields->saveField($embedsMatrix));
-        } else {
+            if (Craft::$app->fields->saveField($embedsCopy)) {
+                // Create a minimal matrix field with the required handle
+                $embedsMatrix = new Matrix([
+                    "groupId" => $group->id,
+                    "name" => "Embeds",
+                    "handle" => "embeds",
+                    "instructions" => "Embeds for the Redactor content"
+                ]);
+                // Attempt to save the field
+                if(Craft::$app->fields->saveField($embedsMatrix)) {
+                    return true;
+                } else {
+                    echo "Couldn't save embeds matrix!";
+                    return false;
+                }
+            } else {
+                echo "Couldn't save embeds copy!";
+                return false;
+            }
+        } catch (\Throwable $thrwbl) {
+            echo "Couldn't save field:\n" . $thrwbl->getMessage();
             return false;
         }
     }
