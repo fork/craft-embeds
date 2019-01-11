@@ -161,7 +161,7 @@ class Embeds extends Component
                 switch (get_class($field)) {
                     case Assets::class:
                         $fieldSettings = EmbedsPlugin::$plugin->settings->getSettingsByFieldId($field->id);
-                        $transforms = array_key_exists("transforms", $fieldSettings) ? $fieldSettings['transforms'] : [];
+                        $transforms = array_key_exists("transforms", $fieldSettings) && $fieldSettings['transforms'] != "" ? $fieldSettings['transforms'] : [];
                         if ($field->limit && $field->limit == 1) {
                             $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), $transforms) : null;
                         } else {
