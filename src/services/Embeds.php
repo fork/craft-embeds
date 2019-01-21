@@ -20,7 +20,6 @@ use craft\fields\Assets;
 use craft\fields\Categories;
 use craft\fields\Checkboxes;
 use craft\fields\Color;
-use craft\fields\data\SingleOptionFieldData;
 use craft\fields\Date;
 use craft\fields\Dropdown;
 use craft\fields\Entries;
@@ -224,7 +223,7 @@ class Embeds extends Component
                     case Date::class:
                         /** @var \DateTime $date */
                         $date = $element[$field->handle];
-                        $data[$field->handle] = $date->getTimestamp();
+                        $data[$field->handle] = $date ? $date->getTimestamp() : false;
                         break;
 
                     case Color::class:
