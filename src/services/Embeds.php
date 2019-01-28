@@ -86,14 +86,14 @@ class Embeds extends Component
      * @param array $transforms
      * @return array
      */
-    public function getElementData(Element $element, array $transforms = []): array
+    public function getElementData(Element $element/*, array $transforms = []*/): array
     {
         // Handle different element types and set their specific attributes
         switch (get_class($element)) {
             case Asset::class:
                 /** @var Asset $element */
                 $srcset = [];
-                foreach ($transforms as $transformSettings) {
+/*                foreach ($transforms as $transformSettings) {
                     $transform = Craft::$app->assetTransforms->getTransformById($transformSettings['transformId']);
                     if ($transform) {
                         $srcset[$transformSettings['srcset']][] = [
@@ -101,7 +101,7 @@ class Embeds extends Component
                             'suffix' => $transformSettings['suffix']
                         ];
                     }
-                }
+                }*/
 
                 $data = [
                     'id' => $element->id,
@@ -162,14 +162,14 @@ class Embeds extends Component
             if (!in_array($field->handle, ["embeds", "embedsCopy"])) {
                 switch (get_class($field)) {
                     case Assets::class:
-                        $fieldSettings = EmbedsPlugin::$plugin->settings->getSettingsByFieldId($field->id);
-                        $transforms = array_key_exists("transforms", $fieldSettings) && $fieldSettings['transforms'] != "" ? $fieldSettings['transforms'] : [];
+                        //$fieldSettings = EmbedsPlugin::$plugin->settings->getSettingsByFieldId($field->id);
+                        //$transforms = array_key_exists("transforms", $fieldSettings) && $fieldSettings['transforms'] != "" ? $fieldSettings['transforms'] : [];
                         if ($field->limit && $field->limit == 1) {
-                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), $transforms) : null;
+                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one()/*, $transforms*/) : null;
                         } else {
                             $data[$field->handle] = [];
                             foreach ($element[$field->handle]->all() as $asset) {
-                                $data[$field->handle][] = $this->getElementData($asset, $transforms);
+                                $data[$field->handle][] = $this->getElementData($asset/*, $transforms*/);
                             }
                         }
                         break;
