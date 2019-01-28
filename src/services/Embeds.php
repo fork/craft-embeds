@@ -111,6 +111,9 @@ class Embeds extends Component
                     'srcset' => $srcset,
                     'height' => $element->height,
                     'width' => $element->width,
+                    'filesize' => $element->size,
+                    'mimeType' => $element->mimeType,
+                    'dateCreated' => $element->dateCreated
                 ];
                 break;
 
@@ -223,7 +226,7 @@ class Embeds extends Component
                     case Date::class:
                         /** @var \DateTime $date */
                         $date = $element[$field->handle];
-                        $data[$field->handle] = $date ? $date->getTimestamp() : false;
+                        $data[$field->handle] = $date ?: false;
                         break;
 
                     case Color::class:
