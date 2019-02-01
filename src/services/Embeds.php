@@ -151,7 +151,7 @@ class Embeds extends Component
             $copy = $element->embedsCopy;
             /** @var MatrixBlockQuery $embeds */
             $embeds = $element->embeds;
-            $data['embeds'] = $this->mergeEmbeds($copy->getRawContent(), $embeds->all());
+            $data['embeds'] = $this->mergeEmbeds($copy->getParsedContent(), $embeds->all());
         }
 
         /** @var FieldLayout $fieldLayout */
