@@ -29,6 +29,7 @@ use craft\fields\RadioButtons;
 use craft\fields\Tags;
 use craft\fields\Users;
 use craft\models\FieldLayout;
+use craft\redactor\Field;
 use craft\redactor\FieldData;
 
 use fork\embeds\Embeds as EmbedsPlugin;
@@ -235,6 +236,14 @@ class Embeds extends Component
                             "rgb" => $element[$field->handle]->getRgb(),
                             "luma" => $element[$field->handle]->getLuma(),
                         ];
+                        break;
+                        
+                    case Field::class:
+                        /** @var FieldData $copy */
+                        $copy = $element[$field->handle];
+                        $copy = $copy->getParsedContent();
+                        $copy = str_replace("\n", "", $copy);
+                        $data[$field->handle] = $copy;
                         break;
 
                     default:
