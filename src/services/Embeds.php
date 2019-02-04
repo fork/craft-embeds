@@ -106,7 +106,6 @@ class Embeds extends Component
 
                 $data = [
                     'id' => $element->id,
-                    'type' => $element->type->handle,
                     'title' => $element->title,
                     'status' => $element->status,
                     'src' => $element->getUrl(),
@@ -123,7 +122,6 @@ class Embeds extends Component
                 /** @var Category $element */
                 $data = [
                     'id' => $element->id,
-                    'type' => $element->type->handle,
                     'title' => $element->title,
                     'slug' => $element->slug,
                     'status' => $element->status,
@@ -145,11 +143,18 @@ class Embeds extends Component
                     'dateUpdated' => $element->dateUpdated->getTimestamp()
                 ];
                 break;
-
-            default:
+                
+            case MatrixBlock::class:
+                /** @var MatrixBlock $element */
                 $data = [
                     'id' => $element->id,
                     'type' => $element->type->handle,
+                ];
+                break;
+
+            default:
+                $data = [
+                    'id' => $element->id
                 ];
                 break;
         }
