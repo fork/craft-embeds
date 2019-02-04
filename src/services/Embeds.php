@@ -106,6 +106,7 @@ class Embeds extends Component
 
                 $data = [
                     'id' => $element->id,
+                    'type' => $element->type->handle,
                     'title' => $element->title,
                     'status' => $element->status,
                     'src' => $element->getUrl(),
@@ -122,6 +123,7 @@ class Embeds extends Component
                 /** @var Category $element */
                 $data = [
                     'id' => $element->id,
+                    'type' => $element->type->handle,
                     'title' => $element->title,
                     'slug' => $element->slug,
                     'status' => $element->status,
@@ -132,6 +134,7 @@ class Embeds extends Component
                 /** @var Entry $element */
                 $data = [
                     'id' => $element->id,
+                    'type' => $element->type->handle,
                     'title' => $element->title,
                     'slug' => $element->slug,
                     'status' => $element->status,
@@ -144,7 +147,10 @@ class Embeds extends Component
                 break;
 
             default:
-                $data = [];
+                $data = [
+                    'id' => $element->id,
+                    'type' => $element->type->handle,
+                ];
                 break;
         }
         if ($element->embeds && $element->embedsCopy) {
