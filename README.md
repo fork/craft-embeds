@@ -59,6 +59,6 @@ Some things to do, and ideas for potential features:
 
 * Fix the merging of copy and embeds
 * Enable using multiple fields via plugin settings
-* 
+* Evaluate possibilities for adding srcsets
 
 Brought to you by [Fork Unstable Media GmbH](https://fork.de)
