@@ -6,7 +6,7 @@ Allow using Embeds within Redactor. Embeds are referenced Matrix Blocks within t
 
 ## Requirements
 
-This plugin requires Craft CMS 3.0.0-beta.23 or later.
+This plugin requires Craft CMS 3.0.0-beta.23 or later and the Craft Redactor plugin.
 
 ## Installation
 
@@ -31,24 +31,34 @@ To install the plugin, follow these instructions.
     ```
     composer require fork/embeds
     ```
-4. In the Control Panel, go to Settings → Plugins and click the “Install” button for Embeds.
+4. In the Control Panel, go to Settings → Plugins and click the “Install” button for Embeds. This will also install
+Redactor if it wasn't already installed before.
 
 ## Embeds Overview
 
--Insert text here-
+This plugin adds a Redactor plugin which enables editors to set markers between paragraphs in a redactor field. These
+markers then work as placeholders for blocks from a matrix field (_embeds_). In the current development phase, this
+plugin only supports one redactor field and one matrix field whit the names _embedsCopy_ and _embeds_. The install
+migration of the plugin creates these fields automatically and also adds a Redactor configuration file for the copy
+field. **Warning**: Renaming the handles of these fields breaks the plugin! The matrix field will be empty. Redactor
+will be installed automatically by the install migration of this plugin.
 
 ## Configuring Embeds
 
--Insert text here-
+Currently there are no configuration options.
 
 ## Using Embeds
 
--Insert text here-
+Add the two fields to any of your EntryTypes' FieldLayout and don't forget to add some MatrixBlocks to the embeds field.
+When you add an embed marker to the copy text and add blocks to the matrix field, the plugin will show you which embed
+will appear at which placeholder.
 
 ## Embeds Roadmap
 
 Some things to do, and ideas for potential features:
 
-* Release it
+* Fix the merging of copy and embeds
+* Enable using multiple fields via plugin settings
+* 
 
 Brought to you by [Fork Unstable Media GmbH](https://fork.de)
