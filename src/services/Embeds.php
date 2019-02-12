@@ -54,11 +54,21 @@ class Embeds extends Component
         $embedsCopy = str_replace("\n", "", $embedsCopy);
         $embedsCopy = preg_replace('/<p><br \/><\/p>/', '', $embedsCopy);
         $copySegments = [];
-        foreach (preg_split('/(<!--pagebreak-->|<hr class=\"redactor_pagebreak\"[^>]*>)/', $embedsCopy) as $segment) {
+        $splitted = preg_split('/(<!--pagebreak-->|<hr class=\"redactor_pagebreak\"[^>]*>)/', $embedsCopy);
+        for ($i = 0; $i < sizeof($splitted); $i++) {
             $copySegments[] = [
                 'type' => "copy",
-                'html' => $segment
+                'html' => $splitted[$i]
             ];
+            /**
+             * add an embed placeholder after each element, except for the last one, if it's empty. if the last element
+             * in the redactor field is an embed, the last element in $splitted will be an empty string.
+             */
+            if (!($i == sizeof($splitted)-1 && empty($splitted[$i]))) {
+                $copySegments[] = [
+                    'type' => "embedPlaceholder"
+                ];
+            }
         };
 
         $embedBlocks = [];
@@ -71,14 +81,15 @@ class Embeds extends Component
             ];
         }
 
+        $embedCounter = 0;
         $merged = [];
-        for ($i = 0; $i < sizeof($copySegments); $i++) {
-            $merged[] = $copySegments[$i];
-            if ($i < sizeof($embedBlocks)) {
-                $merged[] = $embedBlocks[$i];
+        foreach ($copySegments as $copySegment) {
+            if ($copySegment['type'] == "copy" && !empty($copySegment['html'])) {
+                $merged[] = $copySegment;
+            } else  if ($copySegment['type'] == "embedPlaceholder" && $embedCounter < sizeof($embedBlocks)) {
+                $merged[] = $embedBlocks[$embedCounter++];
             }
         }
-
         return $merged;
     }
 
