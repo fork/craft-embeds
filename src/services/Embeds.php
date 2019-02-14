@@ -32,6 +32,7 @@ use craft\models\FieldLayout;
 use craft\redactor\Field;
 use craft\redactor\FieldData;
 
+use DateTime;
 use fork\embeds\Embeds as EmbedsPlugin;
 
 /**
@@ -48,7 +49,7 @@ class Embeds extends Component
      * @param MatrixBlock[] $embeds
      * @return array
      */
-    public function mergeEmbeds(string $embedsCopy, array $embeds): array
+    private function mergeEmbeds(string $embedsCopy, array $embeds): array
     {
         // Handle copy
         $embedsCopy = str_replace("\n", "", $embedsCopy);
@@ -94,6 +95,44 @@ class Embeds extends Component
     }
 
     /**
+     * Converts a DateTime object to an array of it's attributes
+     * @param DateTime $dateTime
+     * @return array
+     */
+    private function convertDateTime(DateTime $dateTime, $date = true, $time = true) : array
+    {
+        $converted = [
+            'c' => date_format($dateTime, 'c'),
+            'U' => date_format($dateTime, 'U'),
+            'e' => date_format($dateTime, 'e'),
+            'O' => date_format($dateTime, 'O'),
+        ];
+        if ($date) {
+            $converted = array_merge(
+                $converted,
+                [
+                    'Y' => date_format($dateTime, 'y'),
+                    'm' => date_format($dateTime, 'm'),
+                    'M' => date_format($dateTime, 'M'),
+                    'd' => date_format($dateTime, 'd'),
+                    'D' => date_format($dateTime, 'D'),
+                ]
+            );
+        }
+        if ($time) {
+            $converted = array_merge(
+                $converted,
+                [
+                    'H' => date_format($dateTime, 'H'),
+                    'i' => date_format($dateTime, 'i'),
+                    's' => date_format($dateTime, 's'),
+                ]
+            );
+        }
+        return $converted;
+    }
+
+    /**
      * @param Element $element
      * @param array $transforms
      * @return array
@@ -125,7 +164,7 @@ class Embeds extends Component
                     'width' => $element->width,
                     'filesize' => $element->size,
                     'mimeType' => $element->mimeType,
-                    'dateCreated' => $element->dateCreated
+                    'dateCreated' => $this->convertDateTime($element->dateCreated)
                 ];
                 break;
 
@@ -148,10 +187,10 @@ class Embeds extends Component
                     'slug' => $element->slug,
                     'status' => $element->status,
                     'authorId' => $element->section->type == "single" ? null : $element->author->id,
-                    'postDate' => $element->postDate->getTimestamp(),
+                    'postDate' => $this->convertDateTime($element->postDate),
                     'section' => $element->section->handle,
-                    'dateCreated' => $element->dateCreated->getTimestamp(),
-                    'dateUpdated' => $element->dateUpdated->getTimestamp()
+                    'dateCreated' => $this->convertDateTime($element->dateCreated),
+                    'dateUpdated' => $this->convertDateTime($element->dateUpdated)
                 ];
                 break;
                 
@@ -247,9 +286,10 @@ class Embeds extends Component
                         break;
 
                     case Date::class:
+                        /** @var Date $field */
                         /** @var \DateTime $date */
                         $date = $element[$field->handle];
-                        $data[$field->handle] = $date ?: false;
+                        $data[$field->handle] = $date ? $this->convertDateTime($date, $field->showDate, $field->showTime) : false;
                         break;
 
                     case Color::class:
