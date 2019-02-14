@@ -104,14 +104,13 @@ class Embeds extends Component
         $converted = [
             'c' => date_format($dateTime, 'c'),
             'U' => date_format($dateTime, 'U'),
-            'e' => date_format($dateTime, 'e'),
-            'O' => date_format($dateTime, 'O'),
         ];
         if ($date) {
             $converted = array_merge(
                 $converted,
                 [
-                    'Y' => date_format($dateTime, 'y'),
+                    'y' => date_format($dateTime, 'y'),
+                    'Y' => date_format($dateTime, 'Y'),
                     'm' => date_format($dateTime, 'm'),
                     'M' => date_format($dateTime, 'M'),
                     'd' => date_format($dateTime, 'd'),
