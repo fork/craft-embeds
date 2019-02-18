@@ -302,7 +302,7 @@ class Embeds extends Component
                     case Field::class:
                         /** @var FieldData $copy */
                         $copy = $element[$field->handle];
-                        $copy = $copy->getParsedContent();
+                        $copy = $copy ? $copy->getParsedContent() : "";
                         $copy = str_replace("\n", "", $copy);
                         $data[$field->handle] = $copy;
                         break;
