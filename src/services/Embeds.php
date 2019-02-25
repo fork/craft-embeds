@@ -97,9 +97,11 @@ class Embeds extends Component
     /**
      * Converts a DateTime object to an array of it's attributes
      * @param DateTime $dateTime
+     * @param bool $date
+     * @param bool $time
      * @return array
      */
-    private function convertDateTime(DateTime $dateTime, $date = true, $time = true) : array
+    public function convertDateTime(DateTime $dateTime, $date = true, $time = true) : array
     {
         $converted = [
             'c' => date_format($dateTime, 'c'),
