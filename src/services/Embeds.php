@@ -103,18 +103,18 @@ class Embeds extends Component
     {
         $converted = [
             'c' => date_format($dateTime, 'c'),
-            'U' => date_format($dateTime, 'U'),
+            //'U' => date_format($dateTime, 'U'),
         ];
         if ($date) {
             $converted = array_merge(
                 $converted,
                 [
-                    'y' => date_format($dateTime, 'y'),
+                    //'y' => date_format($dateTime, 'y'),
                     'Y' => date_format($dateTime, 'Y'),
                     'm' => date_format($dateTime, 'm'),
-                    'M' => date_format($dateTime, 'M'),
+                    //'M' => date_format($dateTime, 'M'),
                     'd' => date_format($dateTime, 'd'),
-                    'D' => date_format($dateTime, 'D'),
+                    //'D' => date_format($dateTime, 'D'),
                 ]
             );
         }
@@ -124,7 +124,7 @@ class Embeds extends Component
                 [
                     'H' => date_format($dateTime, 'H'),
                     'i' => date_format($dateTime, 'i'),
-                    's' => date_format($dateTime, 's'),
+                    //'s' => date_format($dateTime, 's'),
                 ]
             );
         }
