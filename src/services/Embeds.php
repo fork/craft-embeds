@@ -8,7 +8,6 @@
 
 namespace fork\embeds\services;
 
-use Craft;
 use craft\base\Component;
 use craft\base\Element;
 use craft\elements\Asset;
@@ -33,7 +32,6 @@ use craft\redactor\Field;
 use craft\redactor\FieldData;
 
 use DateTime;
-use fork\embeds\Embeds as EmbedsPlugin;
 
 /**
  * Embeds Service
@@ -135,7 +133,6 @@ class Embeds extends Component
 
     /**
      * @param Element $element
-     * @param array $transforms
      * @return array
      */
     public function getElementData(Element $element/*, array $transforms = []*/): array
