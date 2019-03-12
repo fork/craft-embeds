@@ -244,7 +244,12 @@ class Embeds extends Component
                         break;
 
                     case Matrix::class:
-                        $data[$field->handle] = array_map([$this, 'getElementData'], $element[$field->handle]->all());
+                        /** @var Matrix $field */
+                        if ($field->maxBlocks && $field->maxBlocks == 1) {
+                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one()) : null;
+                        } else {
+                            $data[$field->handle] = array_map([$this, 'getElementData'], $element[$field->handle]->all());
+                        }
                         break;
 
                     case Tags::class:
