@@ -103,18 +103,14 @@ class Embeds extends Component
     {
         $converted = [
             'c' => date_format($dateTime, 'c'),
-            //'U' => date_format($dateTime, 'U'),
         ];
         if ($date) {
             $converted = array_merge(
                 $converted,
                 [
-                    //'y' => date_format($dateTime, 'y'),
                     'Y' => date_format($dateTime, 'Y'),
                     'm' => date_format($dateTime, 'm'),
-                    //'M' => date_format($dateTime, 'M'),
                     'd' => date_format($dateTime, 'd'),
-                    //'D' => date_format($dateTime, 'D'),
                 ]
             );
         }
@@ -124,7 +120,6 @@ class Embeds extends Component
                 [
                     'H' => date_format($dateTime, 'H'),
                     'i' => date_format($dateTime, 'i'),
-                    //'s' => date_format($dateTime, 's'),
                 ]
             );
         }
@@ -135,29 +130,17 @@ class Embeds extends Component
      * @param Element $element
      * @return array
      */
-    public function getElementData(Element $element/*, array $transforms = []*/): array
+    public function getElementData(Element $element, int $nestingLevel = 0): array
     {
         // Handle different element types and set their specific attributes
         switch (get_class($element)) {
             case Asset::class:
                 /** @var Asset $element */
-                $srcset = [];
-/*                foreach ($transforms as $transformSettings) {
-                    $transform = Craft::$app->assetTransforms->getTransformById($transformSettings['transformId']);
-                    if ($transform) {
-                        $srcset[$transformSettings['srcset']][] = [
-                            'src' => $element->getUrl($transform->handle),
-                            'suffix' => $transformSettings['suffix']
-                        ];
-                    }
-                }*/
-
                 $data = [
                     'id' => $element->id,
                     'title' => $element->title,
                     'status' => $element->status,
                     'src' => $element->getUrl(),
-                    'srcset' => $srcset,
                     'height' => $element->height,
                     'width' => $element->width,
                     'filesize' => $element->size,
@@ -191,7 +174,7 @@ class Embeds extends Component
                     'dateUpdated' => $this->convertDateTime($element->dateUpdated)
                 ];
                 break;
-                
+
             case MatrixBlock::class:
                 /** @var MatrixBlock $element */
                 $data = [
@@ -206,6 +189,11 @@ class Embeds extends Component
                 ];
                 break;
         }
+
+        if ($nestingLevel > 5) {
+            return $data;
+        }
+
         if ($element->embeds && $element->embedsCopy) {
             /** @var FieldData $copy */
             $copy = $element->embedsCopy;
@@ -222,33 +210,37 @@ class Embeds extends Component
             if (!in_array($field->handle, ["embeds", "embedsCopy"])) {
                 switch (get_class($field)) {
                     case Assets::class:
-                        //$fieldSettings = EmbedsPlugin::$plugin->settings->getSettingsByFieldId($field->id);
-                        //$transforms = array_key_exists("transforms", $fieldSettings) && $fieldSettings['transforms'] != "" ? $fieldSettings['transforms'] : [];
                         if ($field->limit && $field->limit == 1) {
-                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one()/*, $transforms*/) : null;
+                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), ++$nestingLevel) : null;
                         } else {
-                            $data[$field->handle] = [];
-                            foreach ($element[$field->handle]->all() as $asset) {
-                                $data[$field->handle][] = $this->getElementData($asset/*, $transforms*/);
-                            }
+                            $nestingLevel++;
+                            $data[$field->handle] = array_map(function($elem) use ($nestingLevel) {
+                                return $this->getElementData($elem, $nestingLevel);
+                            }, $element[$field->handle]->all());
                         }
                         break;
 
                     case Categories::class:
                     case Entries::class:
                         if ($field->limit && $field->limit == 1) {
-                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one()) : null;
+                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), ++$nestingLevel) : null;
                         } else {
-                            $data[$field->handle] = array_map([$this, 'getElementData'], $element[$field->handle]->all());
+                            $nestingLevel++;
+                            $data[$field->handle] = array_map(function($elem) use ($nestingLevel) {
+                                return $this->getElementData($elem, $nestingLevel);
+                            }, $element[$field->handle]->all());
                         }
                         break;
 
                     case Matrix::class:
                         /** @var Matrix $field */
                         if ($field->maxBlocks && $field->maxBlocks == 1) {
-                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one()) : null;
+                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), ++$nestingLevel) : null;
                         } else {
-                            $data[$field->handle] = array_map([$this, 'getElementData'], $element[$field->handle]->all());
+                            $nestingLevel++;
+                            $data[$field->handle] = array_map(function($elem) use ($nestingLevel) {
+                                return $this->getElementData($elem, $nestingLevel);
+                            }, $element[$field->handle]->all());
                         }
                         break;
 
@@ -302,7 +294,7 @@ class Embeds extends Component
                             "luma" => $element[$field->handle]->getLuma(),
                         ];
                         break;
-                        
+
                     case Field::class:
                         /** @var FieldData $copy */
                         $copy = $element[$field->handle];
