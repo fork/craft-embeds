@@ -190,7 +190,7 @@ class Embeds extends Component
                 break;
         }
 
-        if ($nestingLevel > 10) {
+        if ($nestingLevel > 5) {
             return $data;
         }
 
@@ -211,11 +211,10 @@ class Embeds extends Component
                 switch (get_class($field)) {
                     case Assets::class:
                         if ($field->limit && $field->limit == 1) {
-                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), ++$nestingLevel) : null;
+                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), $nestingLevel+1) : null;
                         } else {
-                            $nestingLevel++;
                             $data[$field->handle] = array_map(function($elem) use ($nestingLevel) {
-                                return $this->getElementData($elem, $nestingLevel);
+                                return $this->getElementData($elem, $nestingLevel+1);
                             }, $element[$field->handle]->all());
                         }
                         break;
@@ -223,11 +222,10 @@ class Embeds extends Component
                     case Categories::class:
                     case Entries::class:
                         if ($field->limit && $field->limit == 1) {
-                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), ++$nestingLevel) : null;
+                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), $nestingLevel+1) : null;
                         } else {
-                            $nestingLevel++;
                             $data[$field->handle] = array_map(function($elem) use ($nestingLevel) {
-                                return $this->getElementData($elem, $nestingLevel);
+                                return $this->getElementData($elem, $nestingLevel+1);
                             }, $element[$field->handle]->all());
                         }
                         break;
@@ -235,11 +233,10 @@ class Embeds extends Component
                     case Matrix::class:
                         /** @var Matrix $field */
                         if ($field->maxBlocks && $field->maxBlocks == 1) {
-                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), ++$nestingLevel) : null;
+                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), $nestingLevel+1) : null;
                         } else {
-                            $nestingLevel++;
                             $data[$field->handle] = array_map(function($elem) use ($nestingLevel) {
-                                return $this->getElementData($elem, $nestingLevel);
+                                return $this->getElementData($elem, $nestingLevel+1);
                             }, $element[$field->handle]->all());
                         }
                         break;
