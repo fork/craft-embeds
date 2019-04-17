@@ -190,7 +190,7 @@ class Embeds extends Component
                 break;
         }
 
-        if ($nestingLevel > 5) {
+        if ($nestingLevel > 10) {
             return $data;
         }
 
