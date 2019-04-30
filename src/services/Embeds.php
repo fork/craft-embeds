@@ -128,9 +128,11 @@ class Embeds extends Component
 
     /**
      * @param Element $element
+     * @param array $ignoreFields
+     * @param int $nestingLevel
      * @return array
      */
-    public function getElementData(Element $element, int $nestingLevel = 0): array
+    public function getElementData(Element $element, array $ignoreFields = [], int $nestingLevel = 0): array
     {
         // Handle different element types and set their specific attributes
         switch (get_class($element)) {
@@ -207,14 +209,14 @@ class Embeds extends Component
         /** @var \craft\base\Field $field */
         foreach ($fieldLayout->getFields() as $field) {
             // Embeds specific fields are getting special treatment
-            if (!in_array($field->handle, ["embeds", "embedsCopy"])) {
+            if (!in_array($field->handle, array_merge(["embeds", "embedsCopy"], $ignoreFields))) {
                 switch (get_class($field)) {
                     case Assets::class:
                         if ($field->limit && $field->limit == 1) {
-                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), $nestingLevel+1) : null;
+                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), $ignoreFields, $nestingLevel+1) : null;
                         } else {
-                            $data[$field->handle] = array_map(function($elem) use ($nestingLevel) {
-                                return $this->getElementData($elem, $nestingLevel+1);
+                            $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
+                                return $this->getElementData($elem, $ignoreFields, $nestingLevel+1);
                             }, $element[$field->handle]->all());
                         }
                         break;
@@ -222,10 +224,10 @@ class Embeds extends Component
                     case Categories::class:
                     case Entries::class:
                         if ($field->limit && $field->limit == 1) {
-                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), $nestingLevel+1) : null;
+                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), $ignoreFields, $nestingLevel+1) : null;
                         } else {
-                            $data[$field->handle] = array_map(function($elem) use ($nestingLevel) {
-                                return $this->getElementData($elem, $nestingLevel+1);
+                            $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
+                                return $this->getElementData($elem, $ignoreFields, $nestingLevel+1);
                             }, $element[$field->handle]->all());
                         }
                         break;
@@ -233,10 +235,10 @@ class Embeds extends Component
                     case Matrix::class:
                         /** @var Matrix $field */
                         if ($field->maxBlocks && $field->maxBlocks == 1) {
-                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), $nestingLevel+1) : null;
+                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), $ignoreFields, $nestingLevel+1) : null;
                         } else {
-                            $data[$field->handle] = array_map(function($elem) use ($nestingLevel) {
-                                return $this->getElementData($elem, $nestingLevel+1);
+                            $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
+                                return $this->getElementData($elem, $ignoreFields, $nestingLevel+1);
                             }, $element[$field->handle]->all());
                         }
                         break;
