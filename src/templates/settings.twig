@@ -11,54 +11,35 @@
 
 {% import "_includes/forms" as forms %}
 
-{#
 {{ forms.textField({
-    label: 'Test',
-    instructions: 'Test',
-    id: 'fieldToImageTransformMapping',
-    name: 'fieldToImageTransformMapping',
-    value: settings['fieldToImageTransformMapping']})
-}}
-#}
+    label: 'Embeds Copy Field Name',
+    instructions: 'The name of the redactor copytext field',
+    id: 'embedsCopyFieldName',
+    name: 'embedsCopyFieldName',
+    value: settings.embedsCopyFieldName,
+    required: true
+}) }}
 
-{% for handle, field in settings %}
-    {{ forms.hidden({
-        id: ['fieldToImageTransformMapping', 'fieldId', field.fieldId]|join('_'),
-        name: 'fieldToImageTransformMapping' ~ '[' ~ loop.index ~ ']' ~ '[fieldId]',
-        value: field.fieldId
-    }) }}
+{{ forms.textField({
+    label: 'Embeds Field Name',
+    instructions: 'The name of the embeds matrix field',
+    id: 'embedsFieldName',
+    name: 'embedsFieldName',
+    value: settings.embedsFieldName,
+    required: true
+}) }}
 
-    {#{{ forms.checkboxGroupField({#}
-        {#label: field.name,#}
-        {#instructions: 'Select the image transforms to use for this field',#}
-        {#id: field.handle,#}
-        {#name: 'fieldToImageTransformMapping' ~ '[' ~ loop.index ~ ']' ~ '[transforms]',#}
-        {#options: field.transforms#}
-    {#}) }}#}
-
-    {{ forms.editableTableField({
-        label: field.name,
-        instructions: "Configure the image transforms to use for this field",
-        id: field.handle,
-        name: 'fieldToImageTransformMapping' ~ '[' ~ loop.index ~ ']' ~ '[transforms]',
-        cols: {
-            "srcset": {
-                heading: "Srcset",
-                info: "Enter any handle here to group the transforms into multiple subgroups.",
-                type: "singleline",
-            },
-            "transformId": {
-                heading: "Transform",
-                info: "Select the transform you want to include for this field.",
-                type: "select",
-                options: transforms
-            },
-            "suffix": {
-                heading: "Suffix",
-                info: "Enter any valid suffix.",
-                type: "singleline"
-            },
-        },
-        rows: field.rows
-    }) }}
+{% set dateFormats = [{label: 'default', value: 'default'}] %}
+{% for key, value in craft.app.formatter.dateTimeFormats %}
+    {% set dateFormats = dateFormats|merge([{label: key, value: key}]) %}
 {% endfor %}
+
+{{ forms.selectField({
+    label: 'Date Format',
+    instructions: 'The format to use for date fields',
+    id: 'dateFormat',
+    name: 'dateFormat',
+    options: dateFormats,
+    value: settings.dateFormat,
+    required: true
+}) }}

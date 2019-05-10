@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.6 - 2019-05-10
+### Added
+- Settings for copytext and embed fieldnames
+- Setting to optionally change the date format for date fields
+- Variable to use `craft.embeds.getElementData()` in twig
+
+### Removed
+- Legacy image transformation code
 
 ## 1.0.5 - 2019-04-30
 ### Added

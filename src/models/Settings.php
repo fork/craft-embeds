@@ -4,7 +4,6 @@ namespace fork\embeds\models;
 
 use Craft;
 use craft\base\Model;
-use craft\validators\ArrayValidator;
 use fork\embeds\Embeds;
 
 /**
@@ -15,60 +14,35 @@ use fork\embeds\Embeds;
 class Settings extends Model
 {
     /**
-     * @var array $fieldToImageTransformMapping
+     * The name of the redactor copytext field
      *
-     * This is an array which will be populated like this:
-     * [
-     *      [
-     *          'fieldID' => fieldId1,
-     *          'transforms' => [
-     *              [
-     *                  'srcset' => "",
-     *                  'transform' => transformId1,
-     *                  'suffix' => ""
-     *              ],
-     *              [
-     *                  'srcset' => "",
-     *                  'transform' => transformId2,
-     *                  'suffix' => ""
-     *              ]
-     *          ]
-     *      ],
-     *      [
-     *          'fieldID' => fieldId2,
-     *          'transforms' => [
-     *              [
-     *                  'srcset' => "",
-     *                  'transform' => transformId1,
-     *                  'suffix' => ""
-     *              ]
-     *          ]
-     *      ]
-     * ]
+     * @var string
      */
-    public $fieldToImageTransformMapping = [];
+    public $embedsCopyFieldName = 'embedsCopy';
 
     /**
-     * @param $fieldId
-     * @return array
+     * The name of the embeds matrix field
+     *
+     * @var string
      */
-    public function getSettingsByFieldId($fieldId) : array
-    {
-        foreach ($this->fieldToImageTransformMapping as $fieldSettings) {
-            if ($fieldId == $fieldSettings['fieldId']) {
-                return $fieldSettings;
-            }
-        }
-        return [];
-    }
+    public $embedsFieldName = 'embeds';
 
+    /**
+     * The format to use for date fields
+     *
+     * @var string
+     */
+    public $dateFormat = 'default';
+    
     /**
      * @return array
      */
     public function rules()
     {
         return [
-            ['fieldToImageTransformMapping', ArrayValidator::class]
+            ['embedsCopyFieldName', 'string'],
+            ['embedsFieldName', 'string'],
+            ['dateFormat', 'string'],
         ];
     }
 }
