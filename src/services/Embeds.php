@@ -8,6 +8,7 @@
 
 namespace fork\embeds\services;
 
+use Craft;
 use craft\base\Component;
 use craft\base\Element;
 use craft\elements\Asset;
@@ -27,6 +28,8 @@ use craft\fields\MultiSelect;
 use craft\fields\RadioButtons;
 use craft\fields\Tags;
 use craft\fields\Users;
+use craft\helpers\DateTimeHelper;
+use craft\i18n\Locale;
 use craft\models\FieldLayout;
 use craft\redactor\Field;
 use craft\redactor\FieldData;
@@ -42,6 +45,47 @@ use DateTime;
  */
 class Embeds extends Component
 {
+    // Properties
+    // =========================================================================
+
+    /**
+     * The name of the redactor copytext field
+     *
+     * @var string
+     */
+    public $embedsCopyFieldName = 'embedsCopy';
+
+    /**
+     * The name of the embeds matrix field
+     *
+     * @var string
+     */
+    public $embedsFieldName = 'embeds';
+
+    /**
+     * The format to use for date(time) fields
+     *
+     * @var string
+     */
+    public $dateFormat = 'default';
+    
+    // Public Methods
+    // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    public function init()
+    {
+        parent::init();
+
+        $settings = \fork\embeds\Embeds::$plugin->getSettings();
+
+        $this->embedsCopyFieldName = $settings->embedsCopyFieldName;
+        $this->embedsFieldName = $settings->embedsFieldName;
+        $this->dateFormat = $settings->dateFormat;
+    }
+
     /**
      * @param string $embedsCopy
      * @param MatrixBlock[] $embeds
@@ -99,31 +143,35 @@ class Embeds extends Component
      * @param bool $time
      * @return array
      */
-    public function convertDateTime(DateTime $dateTime, $date = true, $time = true) : array
+    public function convertDateTime(DateTime $dateTime, $date = true, $time = true)
     {
-        $converted = [
-            'c' => date_format($dateTime, 'c'),
-        ];
-        if ($date) {
-            $converted = array_merge(
-                $converted,
-                [
-                    'Y' => date_format($dateTime, 'Y'),
-                    'm' => date_format($dateTime, 'm'),
-                    'd' => date_format($dateTime, 'd'),
-                ]
-            );
+        if ($this->dateFormat !== 'default') {
+            return Craft::$app->getFormatter()->asDate($dateTime, $this->dateFormat);
+        } else {
+            $converted = [
+                'c' => date_format($dateTime, 'c'),
+            ];
+            if ($date) {
+                $converted = array_merge(
+                    $converted,
+                    [
+                        'Y' => date_format($dateTime, 'Y'),
+                        'm' => date_format($dateTime, 'm'),
+                        'd' => date_format($dateTime, 'd'),
+                    ]
+                );
+            }
+            if ($time) {
+                $converted = array_merge(
+                    $converted,
+                    [
+                        'H' => date_format($dateTime, 'H'),
+                        'i' => date_format($dateTime, 'i'),
+                    ]
+                );
+            }
+            return $converted;
         }
-        if ($time) {
-            $converted = array_merge(
-                $converted,
-                [
-                    'H' => date_format($dateTime, 'H'),
-                    'i' => date_format($dateTime, 'i'),
-                ]
-            );
-        }
-        return $converted;
     }
 
     /**
@@ -196,11 +244,11 @@ class Embeds extends Component
             return $data;
         }
 
-        if ($element->embeds && $element->embedsCopy) {
+        if ($element->{$this->embedsFieldName} && $element->{$this->embedsCopyFieldName}) {
             /** @var FieldData $copy */
-            $copy = $element->embedsCopy;
+            $copy = $element->{$this->embedsCopyFieldName};
             /** @var MatrixBlockQuery $embeds */
-            $embeds = $element->embeds;
+            $embeds = $element->{$this->embedsFieldName};
             $data['embeds'] = $this->mergeEmbeds($copy->getParsedContent(), $embeds->all());
         }
 
@@ -209,7 +257,7 @@ class Embeds extends Component
         /** @var \craft\base\Field $field */
         foreach ($fieldLayout->getFields() as $field) {
             // Embeds specific fields are getting special treatment
-            if (!in_array($field->handle, array_merge(["embeds", "embedsCopy"], $ignoreFields))) {
+            if (!in_array($field->handle, array_merge([$this->embedsFieldName, $this->embedsCopyFieldName], $ignoreFields))) {
                 switch (get_class($field)) {
                     case Assets::class:
                         if ($field->limit && $field->limit == 1) {

@@ -17,9 +17,11 @@ use craft\fields\Matrix;
 use craft\models\MatrixBlockType;
 use craft\redactor\Field as RedactorField;
 use craft\records\Field as FieldRecord;
+use craft\web\twig\variables\CraftVariable;
 use fork\embeds\assetbundles\Embeds\EmbedsAsset;
 use fork\embeds\models\Settings;
 use fork\embeds\services\Embeds as EmbedsService;
+use fork\embeds\variables\EmbedsVariable;
 use yii\base\Event;
 
 /**
@@ -98,6 +100,17 @@ class Embeds extends Plugin
             }
         );
 
+        // Register our variables
+        Event::on(
+            CraftVariable::class,
+            CraftVariable::EVENT_INIT,
+            function (Event $event) {
+                /** @var CraftVariable $variable */
+                $variable = $event->sender;
+                $variable->set('embeds', EmbedsVariable::class);
+            }
+        );
+
 /**
  * Logging in Craft involves using one of the following methods:
  *
@@ -147,66 +160,13 @@ class Embeds extends Plugin
      * block on the settings page.
      *
      * @return string The rendered settings HTML
-     * @throws \Twig_Error_Loader
-     * @throws \yii\base\Exception
      */
     protected function settingsHtml(): string
     {
-        $allImageFields = FieldRecord::find()->where(['type' => Assets::class])->all();
-
-
-        /** @var Matrix $embedsField */
-        $currentSettings = $this->getSettings();
-        $settings = [];
-        foreach ($allImageFields as $field) {
-            /** @var Assets $field -- Get the Field, not the Record */
-            $field = Craft::$app->fields->getFieldById($field->id);
-            // 'allowedKinds' is either null (no restriction) or an array of allowed file types
-            if (!$field->allowedKinds || in_array("image", $field->allowedKinds)) {
-                $fieldSettings = $currentSettings->getSettingsByFieldId($field->id);
-
-                // Get the field's context
-                $context = explode(":", $field->context);
-                switch ($context[0]) {
-                    case "matrixBlockType":
-                        $id = $context[1];
-                        /** @var MatrixBlockType $blockType */
-                        $blockType = Craft::$app->matrix->getBlockTypeById($id);
-                        /** @var Matrix $matrixField */
-                        $matrixField = Craft::$app->fields->getFieldById($blockType->fieldId);
-                        $fieldName = join(" > ", [$matrixField->name, $blockType->name, $field->name]);
-                        $fieldHandle = join("_", [$matrixField->handle, $blockType->handle, $field->handle]);
-                        break;
-
-                    // a.k.a. 'global', standalone field
-                    default:
-                        $fieldName = $field->name;
-                        $fieldHandle = $field->handle;
-
-                }
-
-                $settings[] = [
-                    'name' => $fieldName,
-                    'handle' => $fieldHandle,
-                    'fieldId' => $field->id,
-                    'rows' => array_key_exists('transforms', $fieldSettings) ? $fieldSettings['transforms'] : []
-                ];
-            }
-        }
-
         return Craft::$app->view->renderTemplate(
             'embeds/settings',
             [
-                'settings' => $settings,
-                'transforms' => array_map(
-                    function($transform) {
-                        return [
-                            'label' => $transform->name,
-                            'value' => $transform->id
-                        ];
-                    },
-                    Craft::$app->assetTransforms->getAllTransforms()
-                )
+                'settings' => $this->getSettings()
             ]
         );
     }
