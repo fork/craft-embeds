@@ -13,170 +13,234 @@
 
 
 (function($){
+	var embedElements = [];
 
-/**
- * Functionality to label the embed-pagebreaks in the redactor editor on article pages
- * - check when new matrix block is added
- * - listen for changes in the redactor editor 
- * - update the labels of the embed-pagebreaks
- */
-var SetEmbeds = {
-	init: function() {
-		this.$matrixContainer = $('#fields-embeds-field .matrix-field');
-		this.$richtextContent = $('#fields-embedsCopy-field .redactor-box .redactor-in');
+	function initEmbeds() {
+		// for single editor and embeds
+		if ($('#fields-embeds-field').length && $('#fields-embedsCopy-field').length) {
+			var $matrixField = $('#fields-embeds-field .matrix-field');
+			var $redactor = $('#fields-embedsCopy-field .redactor-box .redactor-in');
 
-        this.$editor = $R('#fields-embedsCopy');
-
-		// if article page
-		if(this.$matrixContainer.length && this.$richtextContent.length) {
-			this.initEmbeds();
-			window.addEventListener('custom-redactor-events', this.checkEmbeds.bind(this), false);
+			// init single Embed
+			new Embed($matrixField, $redactor);
 		}
-	},
 
-	initEmbeds: function() {
-		this.getPageBreaks();
+		if ($('.superTableContainer.matrixLayout')) {
+			// init editor/embeds for all superTableRows
+			getSupertableEmbeds();
 
-		// matrix DOM elements
-		this.$addBlockBtnContainer = this.$matrixContainer.children('.buttons');
-		this.$addBlockBtnGroup = this.$addBlockBtnContainer.children('.btngroup');
-		this.$addBlockBtnGroupBtns = this.$addBlockBtnGroup.children('.btn');
-		this.$addBlockMenuBtn = this.$addBlockBtnContainer.children('.menubtn');
-		this.$blockContainer = this.$matrixContainer.children('.blocks');
+			// event listener for new superTableRow
+			$('.superTableContainer.matrixLayout .superTableAddRow').on('click', getSupertableEmbeds);
+		}
+	}
 
-		// instances of Garnish UI Lib
-		this.matrixInstance = this.$matrixContainer.data('matrix');
-		this.matrixMenuBtnInstance = this.$addBlockMenuBtn.data('menubtn');
+	function getSupertableEmbeds() {
+		// get all children of supertable with editor and embeds
+		var superTableBlocks = $('.superTableMatrix.matrixblock');
+		for (var i = 0; i < superTableBlocks.length; i++) {
+			var editor = $(superTableBlocks[i])
+				.find(' > .fields > .field')
+				.filter(function(index) {
+					return (
+						$(this)
+							.attr('id')
+							.indexOf('fields-embedsCopy-field') >= 1
+					);
+				})
+				.find('.redactor-box .redactor-in');
+			var matrix = $(superTableBlocks[i])
+				.find(' > .fields > .field')
+				.filter(function(index) {
+					return (
+						$(this)
+							.attr('id')
+							.indexOf('fields-embeds-field') >= 1
+					);
+				})
+				.find('.matrix-field');
+			if (editor.length && matrix.length) {
+				embedElements.push({
+					$block: $(superTableBlocks[i]),
+					$matrixField: $(matrix),
+					$redactor: $(editor)
+				});
+			}
+		}
 
-		this.initEventsListeners();
-		this.getBlockTypes();
-	},
+		// init Embed that have not been initialized
+		for (var i = 0; i < embedElements.length; i++) {
+			if (!$(embedElements[i].$block).data('embed-plugin-initialized')) {
+				new Embed(embedElements[i].$matrixField, embedElements[i].$redactor);
+				$(embedElements[i].$block).data('embed-plugin-initialized', true);
+			}
+		}
+	}
 
-	getMatrixBlocks: function() {
-		// matrixblock DOM elements
-		this.$blocks = this.$blockContainer.children();
-		this.$blockOptionBtns =  this.$blocks.find('> .actions > .settings');
+	function Embed($matrixField, $redactor) {
+		this.$matrixField = $matrixField;
+		this.$redactor = $redactor;
 
-		// instances of Garnish UI Lib
-		this.blocksInstances = this.$blocks.map(function(index, block) {return $(block).data('block')} );
-		this.blockOptionsInstances = this.$blockOptionBtns.map(function(index, blockOptionsBtn) {return $(blockOptionsBtn).data('menubtn')} );
-	},
+		this.init = function() {
+			this.getPageBreaks();
 
-	initEventsListeners: function() {	
-		// when a matrix block is sorted
-		this.matrixInstance.blockSort.on('sortChange', function() {
-		    this.getBlockTypes();
-		}.bind(this));
+			// matrix DOM elements
+			var $addBlockBtnContainer = this.$matrixField.find('.buttons');
+			this.$addBlockBtnGroupBtns = $addBlockBtnContainer.find('.btngroup .btn');
+			this.$blockContainer = this.$matrixField.children('.blocks');
 
-		// when a inline version of add-matrixblock-button clicked
-		this.$addBlockBtnGroupBtns.on('click', function(ev) {
-			this.getBlockTypes();
-		}.bind(this));
+			// instances of Garnish UI matrix block
+			this.matrixInstance = this.$matrixField.data('matrix');
 
-		// when a select (drop-down) version of add-matrixblock-button clicked
-		this.matrixMenuBtnInstance.on('optionSelect', function(ev) {
-			this.getBlockTypes();
-		}.bind(this));
+			// instances of Garnish UI menubtn (https://github.com/pixelandtonic/garnishjs/blob/3e57331081c277eeac9a022feeadac5da3f4a2f9/src/MenuBtn.js)
+			this.matrixMenuBtnInstance = $addBlockBtnContainer.find('.menubtn').data('menubtn');
 
-		this.initBlockOptionsEventListener();
-	},
+			this.initEventsListener();
+			this.updateBlocks();
 
-	initBlockOptionsEventListener: function() {
-		this.getMatrixBlocks();
+			// redactor event listeners
+			window.addEventListener('custom-redactor-events', this.checkEmbeds.bind(this), false);
+		};
 
-		// attach inital event listeners when matrixblock option is selected
-		this.blockOptionsInstances.map(function(index, optionsInstance) {
-			// overwrite MatrixInput.js function for custom callback
-			optionsInstance.menu.settings.onOptionSelect = $.proxy(this, 'blockOptionSelected', index);
-		}.bind(this));
-	},
+		this.initEventsListener = function() {
+			// when a matrix block is sorted
+			this.matrixInstance.blockSort.on(
+				'sortChange /',
+				function() {
+					this.updateBlocks();
+				}.bind(this)
+			);
 
-	blockOptionSelected: function(index, selectedElement) {
-		// trigger original MatrixInput.js callback e.g. to add matrixblock
-		var blockInstance = this.blocksInstances[index];
-		blockInstance.onMenuOptionSelect(selectedElement);
+			// when a inline version of add-matrixblock-button clicked
+			this.$addBlockBtnGroupBtns.on(
+				'click',
+				function(ev) {
+					this.updateBlocks();
+				}.bind(this)
+			);
 
-		// update Emebds
-		this.getBlockTypes();
+			// when a select (drop-down) version of add-matrixblock-button clicked
+			this.matrixMenuBtnInstance.on(
+				'optionSelect',
+				function(ev) {
+					this.updateBlocks();
+				}.bind(this)
+			);
+		};
 
-		// add new event listeners for matrix blocks
-		setTimeout(function() {
-			this.initBlockOptionsEventListener();
-		}.bind(this), 400);
-	},
+		this.blockOptionSelected = function(index, selectedElement) {
+			// trigger original MatrixInput.js callback e.g. to add matrixblock
+			var blockInstance = this.blocksInstances[index];
+			blockInstance.onMenuOptionSelect(selectedElement);
 
-	getBlockTypes: function() {
-		// TODO check when block added instead of timeout
-		setTimeout(function() {
+			// update Blocks
+			this.updateBlocks();
+		};
+
+		this.initBlockOptionsEventListener = function() {
+			// attach inital event listeners when matrixblock option is selected
+			this.blockOptionsInstances.map(
+				function(index, optionsInstance) {
+					// overwrite MatrixInput.js function for custom callback
+					optionsInstance.menu.settings.onOptionSelect = $.proxy(this, 'blockOptionSelected', index);
+				}.bind(this)
+			);
+		};
+
+		this.getBlocks = function() {
+			// matrixblock DOM elements
 			this.$blocks = this.$blockContainer.children();
-			this.blocksInstances = this.$blocks.map(function(index, block) {return $(block).data('block')} );
-			this.blockTypes = this.blocksInstances.map(function(index, instance) {return instance.$container.data('type')} );
+			this.$activeBlocks = this.$blocks.not('.disabled');
+			this.$blockOptionBtns = this.$blocks.find('> .actions > .settings');
 
-			this.updateEmbeds();
+			// instances of Garnish UI Lib
+			this.blocksInstances = this.$blocks.map(function(index, block) {
+				return $(block).data('block');
+			});
+			this.activeBlocksInstances = this.$activeBlocks.map(function(index, block) {
+				return $(block).data('block');
+			});
+			this.blockOptionsInstances = this.$blockOptionBtns.map(function(index, blockOptionsBtn) {
+				return $(blockOptionsBtn).data('menubtn');
+			});
+		};
 
-			// set index to matrixblock
-			this.$blocks.map(function(index, block) {
-				var $blockHeadline = $(block).find('.titlebar .blocktype');
-				$blockHeadline.find('.embed-no').remove();
-				$blockHeadline.prepend('<span class="embed-no">'+(index+1)+' </span>');
-			})
-		}.bind(this), 400);
-	},
+		this.updateBlocks = function() {
+			// TODO check when block added instead of timeout
+			setTimeout(
+				function() {
+					this.getBlocks();
 
-	getPageBreaks: function() {
-		this.$pageBreaks = this.$richtextContent.find('.redactor_pagebreak');
-	},
+					// add new event listeners for matrix blocks
+					this.initBlockOptionsEventListener();
 
-	checkEmbeds: function() {
-		this.getPageBreaks();
-		if(this.pageBreaksLength !== this.$pageBreaks.length) this.updateEmbeds();
-	},
+					// set index to matrixblock
+					this.$blocks.map(function(index, block) {
+						var $blockHeadline = $(block).find('.titlebar .blocktype');
+						$blockHeadline.find('.embed-no').remove();
+						$blockHeadline.prepend('<span class="embed-no">' + (index + 1) + ' </span>');
+					});
 
-	updateEmbeds: function() {
-		// console.log('updateEmbeds');
-		this.$pageBreaks.map(function(index, pageBreak) { 
-			// get embed type or fallback
-			var embedType;
-			if(this.blockTypes[index]) {
-				embedType = (index + 1) + ' ' + this.capitalizeFirstLetter(this.blockTypes[index]);
-			} else {
-				embedType = 'Not enough embeds';
-			};
+					this.updateEmbeds();
+				}.bind(this),
+				400
+			);
+		};
 
-			$(pageBreak).eq(0).attr('data-embed', embedType);
-		}.bind(this));
+		this.getPageBreaks = function() {
+			this.$pageBreaks = this.$redactor.find('.redactor_pagebreak');
+		};
 
-		this.pageBreaksLength = this.$pageBreaks.length;
-	},
+		this.checkEmbeds = function() {
+			this.getPageBreaks();
+			if (this.pageBreaksLength !== this.$pageBreaks.length) this.updateEmbeds();
+		};
 
-	capitalizeFirstLetter: function(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+		this.updateEmbeds = function() {
+			this.$pageBreaks.map(
+				function(index, pageBreak) {
+					// get embed type or fallback
+					var embedType;
+					if (this.activeBlocksInstances[index]) {
+						var embedType = this.capitalizeFirstLetter(this.activeBlocksInstances[index].$container.data('type'));
+						var embedID = this.activeBlocksInstances[index].$container.find('.embed-no').html();
+						embedType = embedID + embedType;
+					} else {
+						embedType = 'Not enough embeds';
+					}
+
+					$(pageBreak)
+						.eq(0)
+						.attr('data-embed', embedType);
+				}.bind(this)
+			);
+
+			this.pageBreaksLength = this.$pageBreaks.length;
+		};
+
+		this.capitalizeFirstLetter = function(string) {
+			return string.charAt(0).toUpperCase() + string.slice(1);
+		};
+
+		this.init();
 	}
-}
 
-$(document).ready(function() {
+	$(document).ready(function() {
+		// TODO check when code ready instead of timeout
+		// check if redactor is defined
+		if (typeof $R !== 'undefined') {
+			setTimeout(function() {
+				// get all editors with embeds fields
+				initEmbeds();
 
-	// TODO check when code ready instead of timeout
-	// check if redactor is defined
-	if (typeof $R !== 'undefined') {
-		setTimeout(function() {
-			SetEmbeds.init();
+			}, 500);
 
-            // redactor character limit for infobox
-            if (/entries\/infoBox\/.+/.test(Craft.path)) {
-            	var limiter = $R('#fields-infoboxBody').plugin.limiter;
-                limiter.opts.limiter = 550;
-                limiter.start();
-            }
-		}, 500);
+			// TODO find a better way than timeout here too...
+			// setTimeout(function() {
+			//   // reset craft content changed javascript confirm popup
+			//   Craft.cp.initConfirmUnloadForms();
+			// }, 1500);
+		}
 
-		// TODO find a better way than timeout here too...
-        setTimeout(function() {
-            // reset craft content changed javascript confirm popup
-            Craft.cp.initConfirmUnloadForms();
-        }, 1500);
-	}
-});
-
+	});
 
 })(jQuery);
