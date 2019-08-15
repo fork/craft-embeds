@@ -261,33 +261,33 @@ class Embeds extends Component
                 switch (get_class($field)) {
                     case Assets::class:
                         if ($field->limit && $field->limit == 1) {
-                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), $ignoreFields, $nestingLevel+1) : null;
+                            $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel+1) : null;
                         } else {
                             $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
                                 return $this->getElementData($elem, $ignoreFields, $nestingLevel+1);
-                            }, $element[$field->handle]->all());
+                            }, $element->getFieldValue($field->handle)->all());
                         }
                         break;
 
                     case Categories::class:
                     case Entries::class:
                         if ($field->limit && $field->limit == 1) {
-                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), $ignoreFields, $nestingLevel+1) : null;
+                            $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel+1) : null;
                         } else {
                             $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
                                 return $this->getElementData($elem, $ignoreFields, $nestingLevel+1);
-                            }, $element[$field->handle]->all());
+                            }, $element->getFieldValue($field->handle)->all());
                         }
                         break;
 
                     case Matrix::class:
                         /** @var Matrix $field */
                         if ($field->maxBlocks && $field->maxBlocks == 1) {
-                            $data[$field->handle] = $element[$field->handle]->one() ? $this->getElementData($element[$field->handle]->one(), $ignoreFields, $nestingLevel+1) : null;
+                            $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel+1) : null;
                         } else {
                             $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
                                 return $this->getElementData($elem, $ignoreFields, $nestingLevel+1);
-                            }, $element[$field->handle]->all());
+                            }, $element->getFieldValue($field->handle)->all());
                         }
                         break;
 
@@ -300,7 +300,7 @@ class Embeds extends Component
                                 'status' => $x->status
                             ];
                         };
-                        $data[$field->handle] = array_map($func, $element[$field->handle]->all());
+                        $data[$field->handle] = array_map($func, $element->getFieldValue($field->handle)->all());
                         break;
 
                     case Users::class:
@@ -314,44 +314,44 @@ class Embeds extends Component
                                 'status' => $x->status
                             ];
                         };
-                        $data[$field->handle] = array_map($func, $element[$field->handle]->all());
+                        $data[$field->handle] = array_map($func, $element->getFieldValue($field->handle)->all());
                         break;
 
                     case Checkboxes::class:
                     case MultiSelect::class:
-                        $data[$field->handle] = array_map(function($item) { return $item->value; }, $element[$field->handle]->getArrayCopy());
+                        $data[$field->handle] = array_map(function($item) { return $item->value; }, $element->getFieldValue($field->handle)->getArrayCopy());
                         break;
 
                     case Dropdown::class:
                     case RadioButtons::class:
-                        $data[$field->handle] = $element[$field->handle]->value;
+                        $data[$field->handle] = $element->getFieldValue($field->handle)->value;
                         break;
 
                     case Date::class:
                         /** @var Date $field */
                         /** @var \DateTime $date */
-                        $date = $element[$field->handle];
+                        $date = $element->getFieldValue($field->handle);
                         $data[$field->handle] = $date ? $this->convertDateTime($date, $field->showDate, $field->showTime) : false;
                         break;
 
                     case Color::class:
                         $data[$field->handle] = [
-                            "hex" => $element[$field->handle]->getHex(),
-                            "rgb" => $element[$field->handle]->getRgb(),
-                            "luma" => $element[$field->handle]->getLuma(),
+                            "hex" => $element->getFieldValue($field->handle)->getHex(),
+                            "rgb" => $element->getFieldValue($field->handle)->getRgb(),
+                            "luma" => $element->getFieldValue($field->handle)->getLuma(),
                         ];
                         break;
 
                     case Field::class:
                         /** @var FieldData $copy */
-                        $copy = $element[$field->handle];
+                        $copy = $element->getFieldValue($field->handle);
                         $copy = $copy ? $copy->getParsedContent() : "";
                         $copy = str_replace("\n", "", $copy);
                         $data[$field->handle] = $copy;
                         break;
 
                     default:
-                        $data[$field->handle] = $element[$field->handle];
+                        $data[$field->handle] = $element->getFieldValue($field->handle);
                         break;
                 }
             }
