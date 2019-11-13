@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.1.2 - 2019-11-13
+### Fixed
+- Error during plugin install (permissions) / Use README instructions instead
+
 ## 1.1.1 - 2019-11-13
 ### Added
 - Settings for fieldnames in JS / Init from backend

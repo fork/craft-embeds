@@ -34,6 +34,8 @@ To install the plugin, follow these instructions.
 4. In the Control Panel, go to Settings → Plugins and click the “Install” button for Embeds. This will also install
 Redactor if it wasn't already installed before.
 
+5. Enable the plugin in redactor by putting it into your config/redactor/MyConfig.json (see [Embeds.json](src/config/redactor/Embeds.json))
+
 ## Embeds Overview
 
 This plugin adds a Redactor plugin which enables editors to set markers between paragraphs in a redactor field. These

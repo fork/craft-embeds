@@ -33,14 +33,6 @@ class Install extends Migration
         // Find the 'Common' field group
         $group = FieldGroup::findOne(['name' => 'Common']);
 
-        // Copy the Redactor settings file
-        try {
-            copy(Embeds::$plugin->basePath . "/config/redactor/Embeds.json", Craft::$app->path->getConfigPath() . "/redactor/Embeds.json");
-        } catch (Exception $e) {
-            echo "Couldn't get Config Path:\n" . $e->getMessage();
-            return false;
-        }
-
         // Check if the fields already exist
         $embedsCopy = Craft::$app->fields->getFieldByHandle("embedsCopy");
         $embedsMatrix = Craft::$app->fields->getFieldByHandle("embeds");
