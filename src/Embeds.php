@@ -88,6 +88,25 @@ class Embeds extends Plugin
         if (Craft::$app->request->isCpRequest) {
             $view = Craft::$app->getView();
             $view->registerAssetBundle(EmbedsAsset::class);
+
+            $settings = $this->getSettings();
+            $embedsName = $settings->embedsFieldName;
+            $embedsCopyName = $settings->embedsCopyFieldName;
+
+            $view->registerJs("
+            if (typeof \$R !== 'undefined') {
+			setTimeout(function() {
+				// get all editors with embeds fields
+				Craft.initEmbeds('$embedsName', '$embedsCopyName');
+
+			}, 500);
+
+			// TODO find a better way than timeout here too...
+			// setTimeout(function() {
+			//   // reset craft content changed javascript confirm popup
+			//   Craft.cp.initConfirmUnloadForms();
+			// }, 1500);
+		    }");
         }
 
         Event::on(

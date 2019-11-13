@@ -14,12 +14,16 @@
 
 (function($){
 	var embedElements = [];
+	var embedsName = 'embeds';
+	var embedsCopyName = 'embedsCopy';
 
-	function initEmbeds() {
+	Craft.initEmbeds = function(embedsNameSetting, embedsCopyNameSetting) {
+		embedsName = embedsNameSetting;
+		embedsCopyName = embedsCopyNameSetting;
 		// for single editor and embeds
-		if ($('#fields-embeds-field').length && $('#fields-embedsCopy-field').length) {
-			var $matrixField = $('#fields-embeds-field .matrix-field');
-			var $redactor = $('#fields-embedsCopy-field .redactor-box .redactor-in');
+		if ($('#fields-'+embedsName+'-field').length && $('#fields-'+embedsCopyName+'-field').length) {
+			var $matrixField = $('#fields-'+embedsName+'-field .matrix-field');
+			var $redactor = $('#fields-'+embedsCopyName+'-field .redactor-box .redactor-in');
 
 			// init single Embed
 			new Embed($matrixField, $redactor);
@@ -44,7 +48,7 @@
 					return (
 						$(this)
 							.attr('id')
-							.indexOf('fields-embedsCopy-field') >= 1
+							.indexOf('fields-'+embedsCopyName+'-field') >= 1
 					);
 				})
 				.find('.redactor-box .redactor-in');
@@ -54,7 +58,7 @@
 					return (
 						$(this)
 							.attr('id')
-							.indexOf('fields-embeds-field') >= 1
+							.indexOf('fields-'+embedsName+'-field') >= 1
 					);
 				})
 				.find('.matrix-field');
@@ -223,24 +227,5 @@
 
 		this.init();
 	}
-
-	$(document).ready(function() {
-		// TODO check when code ready instead of timeout
-		// check if redactor is defined
-		if (typeof $R !== 'undefined') {
-			setTimeout(function() {
-				// get all editors with embeds fields
-				initEmbeds();
-
-			}, 500);
-
-			// TODO find a better way than timeout here too...
-			// setTimeout(function() {
-			//   // reset craft content changed javascript confirm popup
-			//   Craft.cp.initConfirmUnloadForms();
-			// }, 1500);
-		}
-
-	});
 
 })(jQuery);
