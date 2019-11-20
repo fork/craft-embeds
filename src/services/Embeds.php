@@ -129,7 +129,7 @@ class Embeds extends Component
         foreach ($copySegments as $copySegment) {
             if ($copySegment['type'] == "copy" && !empty($copySegment['html'])) {
                 $merged[] = $copySegment;
-            } else  if ($copySegment['type'] == "embedPlaceholder" && $embedCounter < sizeof($embedBlocks)) {
+            } elseif ($copySegment['type'] == "embedPlaceholder" && $embedCounter < sizeof($embedBlocks)) {
                 $merged[] = $embedBlocks[$embedCounter++];
             }
         }
