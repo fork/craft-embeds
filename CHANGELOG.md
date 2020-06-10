@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.1.3 - 2020-06-10
+### Fixed
+- Error during plugin install / Matrix now requires at least one blocktype / log errors during migration
+
 ## 1.1.2 - 2019-11-13
 ### Fixed
 - Error during plugin install (permissions) / Use README instructions instead

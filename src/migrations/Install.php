@@ -5,6 +5,7 @@ namespace fork\embeds\migrations;
 use Craft;
 use craft\db\Migration;
 use craft\fields\Matrix;
+use craft\models\MatrixBlockType;
 use craft\records\FieldGroup;
 use craft\redactor\Field;
 use fork\embeds\Embeds;
@@ -51,31 +52,43 @@ class Install extends Migration
             "availableVolumes" => [],
             "availableTransforms" => []
         ]);
+
+        // Create a minimal matrix field with the required handle
+        $embedsMatrix = new Matrix([
+            "groupId" => $group->id,
+            "name" => "Embeds",
+            "handle" => "embeds",
+            "instructions" => "Embeds for the Redactor content"
+        ]);
+
+        // Matrix needs at least one blocktype
+        $blockType = new MatrixBlockType();
+        $blockType->name = 'Image';
+        $blockType->handle = 'image';
+        $embedsMatrix->setBlockTypes([$blockType]);
+
         try {
             // Attempt to save the field
-            if (Craft::$app->fields->saveField($embedsCopy)) {
-                // Create a minimal matrix field with the required handle
-                $embedsMatrix = new Matrix([
-                    "groupId" => $group->id,
-                    "name" => "Embeds",
-                    "handle" => "embeds",
-                    "instructions" => "Embeds for the Redactor content"
-                ]);
-                // Attempt to save the field
-                if(Craft::$app->fields->saveField($embedsMatrix)) {
-                    return true;
-                } else {
-                    echo "Couldn't save embeds matrix!";
+            if (!Craft::$app->fields->getFieldByHandle("embedsCopy")) {
+                Craft::$app->fields->saveField($embedsCopy);
+                if ($embedsCopy->hasErrors()) {
+                    Craft::error(implode(', ', $embedsCopy->getErrorSummary(true)), 'embeds-plugin');
                     return false;
                 }
-            } else {
-                echo "Couldn't save embeds copy!";
-                return false;
+            }
+            if (!Craft::$app->fields->getFieldByHandle("embeds")) {
+                Craft::$app->fields->saveField($embedsMatrix);
+                if ($embedsMatrix->hasErrors()) {
+                    Craft::error(implode(', ', $embedsMatrix->getErrorSummary(true)), 'embeds-plugin');
+                    return false;
+                }
             }
         } catch (\Throwable $thrwbl) {
-            echo "Couldn't save field:\n" . $thrwbl->getMessage();
+            Craft::error("Couldn't save field:\n" . $thrwbl->getMessage(), 'embeds-plugin');
             return false;
         }
+
+        return true;
     }
 
     /**
