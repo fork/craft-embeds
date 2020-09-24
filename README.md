@@ -1,3 +1,9 @@
+<div align="center">
+  <a href="https://www.fork.de">
+    <img src="./assets/fork-logo.png" width="156" height="30" alt="Fork Logo" />
+  </a>
+</div>
+
 # Embeds plugin for Craft CMS 3.x
 
 Allow using Embeds within Redactor. Embeds are referenced Matrix Blocks within the Redactor body.
@@ -13,26 +19,26 @@ This plugin requires Craft CMS 3.0.0-beta.23 or later and the Craft Redactor plu
 To install the plugin, follow these instructions.
 
 1. Open your terminal and go to your Craft project:
-    ```
-    cd /path/to/project
-    ```
+   ```
+   cd /path/to/project
+   ```
 2. (As long as this is unreleased) Add the repository to your composer.json:
-    ```
-    {
-        "repositories": [
-            {
-                "type": "vcs",
-                "url":  "git@github.com:fork/embeds.git"
-            }
-        ]
-    }
-    ```
+   ```
+   {
+       "repositories": [
+           {
+               "type": "vcs",
+               "url":  "git@github.com:fork/embeds.git"
+           }
+       ]
+   }
+   ```
 3. Then tell Composer to load the plugin:
-    ```
-    composer require fork/embeds
-    ```
+   ```
+   composer require fork/embeds
+   ```
 4. In the Control Panel, go to Settings → Plugins and click the “Install” button for Embeds. This will also install
-Redactor if it wasn't already installed before.
+   Redactor if it wasn't already installed before.
 
 5. Enable the plugin in redactor by putting it into your config/redactor/MyConfig.json (see [Embeds.json](src/config/redactor/Embeds.json))
 
@@ -59,8 +65,12 @@ will appear at which placeholder.
 
 Some things to do, and ideas for potential features:
 
-* Fix the merging of copy and embeds
-* Enable using multiple fields via plugin settings
-* Evaluate possibilities for adding srcsets
+- Fix the merging of copy and embeds
+- Enable using multiple fields via plugin settings
+- Evaluate possibilities for adding srcsets
 
-Brought to you by [Fork Unstable Media GmbH](https://fork.de)
+<div align="center">
+  <img src="./assets/heart.png" width="38" height="41" alt="Fork Logo" />
+
+  <p>Brought to you by <a href="https://www.fork.de">Fork Unstable Media GmbH</a></p>
+</div>
