@@ -8,8 +8,6 @@
 
 Allow using Embeds within Redactor. Embeds are referenced Matrix Blocks within the Redactor body.
 
-![Screenshot](resources/img/plugin-logo.png)
-
 ## Requirements
 
 This plugin requires Craft CMS 3.0.0-beta.23 or later and the Craft Redactor plugin.
