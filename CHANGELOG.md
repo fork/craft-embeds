@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Fixed
 - ...
 
+## [1.1.4] - 2021-01-20
+### Fixed
+- PSR-4 compliance issue
+
 ## [1.1.3] - 2020-06-10
 ### Fixed
 - Error during plugin install / Matrix now requires at least one blocktype / log errors during migration
