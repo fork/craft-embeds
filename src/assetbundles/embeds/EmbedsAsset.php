@@ -1,14 +1,14 @@
 <?php
 /**
- * Otto plugin for Craft CMS 3.x
+ * Plugin for Craft CMS 3.x
  *
- * Otto Website Features plugin. Do not disable!
+ * Website Features plugin. Do not disable!
  *
  * @link      http://fork.de
  * @copyright Copyright (c) 2018 Fork Unstable Media GmbH
  */
 
-namespace fork\embeds\assetbundles\Embeds;
+namespace fork\embeds\assetbundles\embeds;
 
 use Craft;
 use craft\redactor\assets\redactor\RedactorAsset;

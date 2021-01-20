@@ -18,7 +18,7 @@ use craft\models\MatrixBlockType;
 use craft\redactor\Field as RedactorField;
 use craft\records\Field as FieldRecord;
 use craft\web\twig\variables\CraftVariable;
-use fork\embeds\assetbundles\Embeds\EmbedsAsset;
+use fork\embeds\assetbundles\embeds\EmbedsAsset;
 use fork\embeds\models\Settings;
 use fork\embeds\services\Embeds as EmbedsService;
 use fork\embeds\variables\EmbedsVariable;

@@ -26,7 +26,7 @@ To install the plugin, follow these instructions.
        "repositories": [
            {
                "type": "vcs",
-               "url":  "git@github.com:fork/embeds.git"
+               "url":  "git@github.com:fork/craft-embeds.git"
            }
        ]
    }
