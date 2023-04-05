@@ -2,7 +2,7 @@
     "name": "fork/embeds",
     "description": "Allow using Embeds within Redactor. Embeds are referenced Matrix Blocks within the Redactor body.",
     "type": "craft-plugin",
-    "version": "1.1.4.1",
+    "version": "dev-2.0",
     "keywords": [
         "craft",
         "cms",
@@ -18,8 +18,8 @@
         }
     ],
     "require": {
-        "craftcms/cms": "^3.0.0-RC1",
-        "craftcms/redactor": "^2.1"
+        "craftcms/cms": "^4.0.0-alpha",
+        "craftcms/redactor": "^3.0"
     },
     "autoload": {
         "psr-4": {
