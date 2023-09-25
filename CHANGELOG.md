@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Fixed
 - ...
 
+## [1.1.4.2] - 2023-09-25
+### Added
+- uri for entries in data
+
 ## [1.1.4] - 2021-01-20
 ### Fixed
 - PSR-4 compliance issue
