@@ -217,7 +217,7 @@ class Embeds extends Component
                     'title' => $element->title,
                     'slug' => $element->slug,
                     'status' => $element->status,
-                    'authorId' => $element->section->type == "single" ? null : $element->author->id,
+                    'authorId' => $element->section->type == "single" ? null : $element->author?->id,
                     'postDate' => $this->convertDateTime($element->postDate),
                     'section' => $element->section->handle,
                     'dateCreated' => $this->convertDateTime($element->dateCreated),
