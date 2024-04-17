@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Fixed
 - ...
 
+## [1.1.4.3] - 2024-04-17
+### Added
+- check for author in element
+
 ## [1.1.4.2] - 2023-09-25
 ### Added
 - uri for entries in data
