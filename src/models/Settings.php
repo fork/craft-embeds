@@ -1,10 +1,10 @@
 <?php
+declare(strict_types=1);
 
 namespace fork\embeds\models;
 
 use Craft;
 use craft\base\Model;
-use fork\embeds\Embeds;
 
 /**
  * Class Settings
@@ -33,7 +33,7 @@ class Settings extends Model
      * @var string
      */
     public $dateFormat = 'default';
-    
+
     /**
      * @return array
      */

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Embeds Services
  *
@@ -28,8 +29,6 @@ use craft\fields\MultiSelect;
 use craft\fields\RadioButtons;
 use craft\fields\Tags;
 use craft\fields\Users;
-use craft\helpers\DateTimeHelper;
-use craft\i18n\Locale;
 use craft\models\FieldLayout;
 use craft\redactor\Field;
 use craft\redactor\FieldData;
@@ -68,7 +67,7 @@ class Embeds extends Component
      * @var string
      */
     public $dateFormat = 'default';
-    
+
     // Public Methods
     // =========================================================================
 

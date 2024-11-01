@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Embeds plugin for Craft CMS 3.x
  *
@@ -10,7 +11,6 @@
 
 namespace fork\embeds\variables;
 
-use Craft;
 use craft\base\Element;
 use fork\embeds\Embeds;
 
