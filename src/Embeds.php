@@ -58,13 +58,13 @@ class Embeds extends Plugin
      */
     public string $schemaVersion = '1.0.0';
     
-    public string $developer = 'Fork Unstable Media GmbH';
+    public ?string $developer = 'Fork Unstable Media GmbH';
 
-    public string $developerUrl = 'https://fork.de';
+    public ?string $developerUrl = 'https://fork.de';
 
-    public string $documentationUrl = 'https://github.com/fork/craft-embeds';
+    public ?string $documentationUrl = 'https://github.com/fork/craft-embeds';
 
-    public string $changelogUrl = 'https://github.com/fork/craft-embeds/blob/master/CHANGELOG.md';
+    public ?string $changelogUrl = 'https://github.com/fork/craft-embeds/blob/master/CHANGELOG.md';
 
 
     // Public Methods
