@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace fork\embeds\migrations;
 
@@ -8,8 +9,6 @@ use craft\fields\Matrix;
 use craft\models\MatrixBlockType;
 use craft\records\FieldGroup;
 use craft\redactor\Field;
-use fork\embeds\Embeds;
-use yii\base\Exception;
 
 /**
  * Install migration.

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Plugin for Craft CMS 3.x
  *

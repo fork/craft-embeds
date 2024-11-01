@@ -1,6 +1,7 @@
 <?php
+declare(strict_types=1);
 /**
- * Embeds plugin for Craft CMS 3.x
+ * Embeds plugin for Craft CMS 3.x and 4.x
  *
  * Allow using Embeds within Redactor. Embeds are referenced Matrix Blocks within the Redactor body.
  *
@@ -12,11 +13,7 @@ namespace fork\embeds;
 
 use Craft;
 use craft\base\Plugin;
-use craft\fields\Assets;
-use craft\fields\Matrix;
-use craft\models\MatrixBlockType;
 use craft\redactor\Field as RedactorField;
-use craft\records\Field as FieldRecord;
 use craft\web\twig\variables\CraftVariable;
 use fork\embeds\assetbundles\embeds\EmbedsAsset;
 use fork\embeds\models\Settings;
@@ -50,20 +47,16 @@ class Embeds extends Plugin
     /**
      * Static property that is an instance of this plugin class so that it can be accessed via
      * Embeds::$plugin
-     *
-     * @var Embeds
      */
-    public static $plugin;
+    public static self $plugin;
 
     // Public Properties
     // =========================================================================
 
     /**
      * To execute your plugin’s migrations, you’ll need to increase its schema version.
-     *
-     * @var string
      */
-    public $schemaVersion = '1.0.0';
+    public string $schemaVersion = '1.0.0';
 
     // Public Methods
     // =========================================================================
@@ -79,7 +72,7 @@ class Embeds extends Plugin
      * you do not need to load it in your init() method.
      *
      */
-    public function init()
+    public function init(): void
     {
         parent::init();
         self::$plugin = $this;
