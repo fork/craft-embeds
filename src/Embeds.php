@@ -168,10 +168,8 @@ class Embeds extends Plugin
 
     /**
      * Creates and returns the model used to store the plugin’s settings.
-     *
-     * @return \craft\base\Model|null
      */
-    protected function createSettingsModel()
+    protected function createSettingsModel(): ?craft\base\Model
     {
         return new Settings();
     }
