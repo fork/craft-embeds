@@ -218,7 +218,7 @@ class Embeds extends Component
                     'uri' => $element->uri,
                     'status' => $element->status,
                     'authorId' => $element->section->type == "single" ? null : $element->author?->id,
-                    'postDate' => $this->convertDateTime($element->postDate),
+                    'postDate' => !is_null($element->postDate) ? $this->convertDateTime($element->postDate) : null,
                     'section' => $element->section->handle,
                     'dateCreated' => $this->convertDateTime($element->dateCreated),
                     'dateUpdated' => $this->convertDateTime($element->dateUpdated)
