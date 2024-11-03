@@ -260,7 +260,7 @@ class Embeds extends Component
             if (!in_array($field->handle, array_merge([$this->embedsFieldName, $this->embedsCopyFieldName], $ignoreFields))) {
                 switch (get_class($field)) {
                     case Assets::class:
-                        if ($field->limit && $field->limit == 1) {
+                        if ($field->maxRelations && $field->maxRelations == 1) {
                             $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel+1) : null;
                         } else {
                             $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
