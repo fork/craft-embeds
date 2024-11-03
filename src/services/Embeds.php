@@ -255,7 +255,7 @@ class Embeds extends Component
         /** @var FieldLayout $fieldLayout */
         $fieldLayout = $element->fieldLayout;
         /** @var \craft\base\Field $field */
-        foreach ($fieldLayout->getFields() as $field) {
+        foreach ($fieldLayout->getCustomFields() as $field) {
             // Embeds specific fields are getting special treatment
             if (!in_array($field->handle, array_merge([$this->embedsFieldName, $this->embedsCopyFieldName], $ignoreFields))) {
                 switch (get_class($field)) {
