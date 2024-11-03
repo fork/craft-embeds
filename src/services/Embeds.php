@@ -271,7 +271,7 @@ class Embeds extends Component
 
                     case Categories::class:
                     case Entries::class:
-                        if ($field->limit && $field->limit == 1) {
+                        if ($field->maxResults && $field->maxResults == 1) {
                             $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel+1) : null;
                         } else {
                             $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
