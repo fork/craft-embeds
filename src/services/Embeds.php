@@ -246,11 +246,16 @@ class Embeds extends Component
         }
 
         if ($element->{$this->embedsFieldName} && $element->{$this->embedsCopyFieldName}) {
-            /** @var FieldData $copy */
-            $copy = $element->{$this->embedsCopyFieldName};
+            $content = "";
+            if ($element->{$this->embedsCopyFieldName} !== null) {
+                /** @var FieldData $copy */
+                $copy = $element->{$this->embedsCopyFieldName};
+                $content = $copy->getParsedContent();
+            }
+
             /** @var MatrixBlockQuery $embeds */
             $embeds = $element->{$this->embedsFieldName};
-            $data['embeds'] = $this->mergeEmbeds($copy->getParsedContent(), $embeds->all());
+            $data['embeds'] = $this->mergeEmbeds($content, $embeds->all());
         }
 
         /** @var FieldLayout $fieldLayout */
@@ -348,8 +353,8 @@ class Embeds extends Component
                     case Field::class:
                         /** @var FieldData $copy */
                         $copy = $element->getFieldValue($field->handle);
-                        $copy = $copy->getParsedContent();
-                        $copy = str_replace("\n", "", $copy);
+                        $content = $copy->getParsedContent();
+                        $copy = str_replace("\n", "", $content);
                         $data[$field->handle] = $copy;
                         break;
 
