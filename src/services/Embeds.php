@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /**
  * Embeds Services
@@ -100,15 +101,15 @@ class Embeds extends Component
         for ($i = 0; $i < sizeof($splitted); $i++) {
             $copySegments[] = [
                 'type' => "copy",
-                'html' => $splitted[$i]
+                'html' => $splitted[$i],
             ];
             /**
              * add an embed placeholder after each element, except for the last one, if it's empty. if the last element
              * in the redactor field is an embed, the last element in $splitted will be an empty string.
              */
-            if (!($i == sizeof($splitted)-1 && empty($splitted[$i]))) {
+            if (!($i == sizeof($splitted) - 1 && empty($splitted[$i]))) {
                 $copySegments[] = [
-                    'type' => "embedPlaceholder"
+                    'type' => "embedPlaceholder",
                 ];
             }
         };
@@ -119,7 +120,7 @@ class Embeds extends Component
             $type = $embed->type->handle;
             $embedBlocks[] = [
                 'type' => $type,
-                'data' => $this->getElementData($embed)
+                'data' => $this->getElementData($embed),
             ];
         }
 
@@ -142,7 +143,7 @@ class Embeds extends Component
      * @param bool $time
      * @return array
      */
-    public function convertDateTime(DateTime $dateTime, $date = true, $time = true)
+    public function convertDateTime(DateTime $dateTime, $date = true, $time = true): array|string
     {
         if ($this->dateFormat !== 'default') {
             return Craft::$app->getFormatter()->asDate($dateTime, $this->dateFormat);
@@ -194,7 +195,7 @@ class Embeds extends Component
                     'width' => $element->width,
                     'filesize' => $element->size,
                     'mimeType' => $element->mimeType,
-                    'dateCreated' => $this->convertDateTime($element->dateCreated)
+                    'dateCreated' => $this->convertDateTime($element->dateCreated),
                 ];
                 break;
 
@@ -221,7 +222,7 @@ class Embeds extends Component
                     'postDate' => !is_null($element->postDate) ? $this->convertDateTime($element->postDate) : null,
                     'section' => $element->section->handle,
                     'dateCreated' => $this->convertDateTime($element->dateCreated),
-                    'dateUpdated' => $this->convertDateTime($element->dateUpdated)
+                    'dateUpdated' => $this->convertDateTime($element->dateUpdated),
                 ];
                 break;
 
@@ -235,7 +236,7 @@ class Embeds extends Component
 
             default:
                 $data = [
-                    'id' => $element->id
+                    'id' => $element->id,
                 ];
                 break;
         }
@@ -261,10 +262,10 @@ class Embeds extends Component
                 switch (get_class($field)) {
                     case Assets::class:
                         if ($field->maxRelations && $field->maxRelations == 1) {
-                            $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel+1) : null;
+                            $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel + 1) : null;
                         } else {
                             $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
-                                return $this->getElementData($elem, $ignoreFields, $nestingLevel+1);
+                                return $this->getElementData($elem, $ignoreFields, $nestingLevel + 1);
                             }, $element->getFieldValue($field->handle)->all());
                         }
                         break;
@@ -272,10 +273,10 @@ class Embeds extends Component
                     case Categories::class:
                     case Entries::class:
                         if ($field->maxRelations && $field->maxRelations == 1) {
-                            $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel+1) : null;
+                            $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel + 1) : null;
                         } else {
                             $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
-                                return $this->getElementData($elem, $ignoreFields, $nestingLevel+1);
+                                return $this->getElementData($elem, $ignoreFields, $nestingLevel + 1);
                             }, $element->getFieldValue($field->handle)->all());
                         }
                         break;
@@ -283,35 +284,35 @@ class Embeds extends Component
                     case Matrix::class:
                         /** @var Matrix $field */
                         if ($field->maxBlocks && $field->maxBlocks == 1) {
-                            $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel+1) : null;
+                            $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel + 1) : null;
                         } else {
                             $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
-                                return $this->getElementData($elem, $ignoreFields, $nestingLevel+1);
+                                return $this->getElementData($elem, $ignoreFields, $nestingLevel + 1);
                             }, $element->getFieldValue($field->handle)->all());
                         }
                         break;
 
                     case Tags::class:
-                        $func = function ($x) {
+                        $func = function($x) {
                             return [
                                 'id' => $x->id,
                                 'title' => $x->title,
                                 'slug' => $x->slug,
-                                'status' => $x->status
+                                'status' => $x->status,
                             ];
                         };
                         $data[$field->handle] = array_map($func, $element->getFieldValue($field->handle)->all());
                         break;
 
                     case Users::class:
-                        $func = function ($x) {
+                        $func = function($x) {
                             return [
                                 'id' => $x->id,
                                 'username' => $x->username,
                                 'fullName' => $x->fullName,
                                 'name' => $x->name,
                                 'email' => $x->email,
-                                'status' => $x->status
+                                'status' => $x->status,
                             ];
                         };
                         $data[$field->handle] = array_map($func, $element->getFieldValue($field->handle)->all());
@@ -319,7 +320,9 @@ class Embeds extends Component
 
                     case Checkboxes::class:
                     case MultiSelect::class:
-                        $data[$field->handle] = array_map(function($item) { return $item->value; }, $element->getFieldValue($field->handle)->getArrayCopy());
+                        $data[$field->handle] = array_map(function($item) {
+                            return $item->value;
+                        }, $element->getFieldValue($field->handle)->getArrayCopy());
                         break;
 
                     case Dropdown::class:
@@ -331,7 +334,7 @@ class Embeds extends Component
                         /** @var Date $field */
                         /** @var \DateTime $date */
                         $date = $element->getFieldValue($field->handle);
-                        $data[$field->handle] = $date ? $this->convertDateTime($date, $field->showDate, $field->showTime) : false;
+                        $data[$field->handle] = $this->convertDateTime($date, $field->showDate, $field->showTime);
                         break;
 
                     case Color::class:
@@ -345,7 +348,7 @@ class Embeds extends Component
                     case Field::class:
                         /** @var FieldData $copy */
                         $copy = $element->getFieldValue($field->handle);
-                        $copy = $copy ? $copy->getParsedContent() : "";
+                        $copy = $copy->getParsedContent();
                         $copy = str_replace("\n", "", $copy);
                         $data[$field->handle] = $copy;
                         break;

@@ -1,0 +1,37 @@
+includes:
+    - vendor/craftcms/phpstan/phpstan.neon
+
+parameters:
+    level: 5
+    paths:
+        - %currentWorkingDirectory%/src
+    excludePaths:
+        - vendor
+    scanFiles:
+        - vendor/yiisoft/yii2/Yii.php
+        - vendor/craftcms/cms/src/Craft.php
+        - vendor/twig/twig/src/Extension/CoreExtension.php
+        - vendor/symplify/easy-coding-standard/vendor/friendsofphp/php-cs-fixer/src/Fixer/Whitespace/ArrayIndentationFixer.php
+        - vendor/symplify/easy-coding-standard/vendor/friendsofphp/php-cs-fixer/src/Fixer/Whitespace/MethodChainingIndentationFixer.php
+    earlyTerminatingMethodCalls:
+        Craft:
+            - dd
+        yii\base\Application:
+            - end
+        yii\base\ErrorHandler:
+            - convertExceptionToError
+    ignoreErrors:
+        - '#Call to an undefined method yii\\web\\UrlManager::setRouteParams\(\)#'
+        - '#Call to an undefined method yii\\base\\View::hook\(\)#'
+        - '#Call to an undefined method yii\\base\\View::registerTwigExtension\(\)#'
+        - '#Call to an undefined method yii\\console\\Request|yii\\web\\Request::getIsSiteRequest\(\)#'
+        - '#^Call to an undefined method craft\\elements\\db\\EntryQuery::#'
+        - '#^Access to an undefined property craft\\elements\\GlobalSet::\$#'
+        - '#^Access to an undefined property craft\\elements\\Address::\$#'
+        - '#PHPDoc tag @mixin contains invalid type craft\\base\\+[a-zA-Z0-9]#'
+        - '#^Dead catch#'
+        - '#^PHPDoc tag @mixin contains invalid type CraftTrait\.$#'
+        - '#^Parameter \#2 \$callback of function usort expects#'
+    reportUnmatchedIgnoredErrors: false
+    universalObjectCratesClasses:
+        - craft\elements\Entry

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /**
  * Embeds plugin for Craft CMS 3.x and 4.x
@@ -12,7 +13,9 @@ declare(strict_types=1);
 namespace fork\embeds;
 
 use Craft;
+use craft\base\Model;
 use craft\base\Plugin;
+use craft\redactor\events\RegisterPluginPathsEvent;
 use craft\redactor\Field as RedactorField;
 use craft\web\twig\variables\CraftVariable;
 use fork\embeds\assetbundles\embeds\EmbedsAsset;
@@ -57,7 +60,7 @@ class Embeds extends Plugin
      * To execute your plugin’s migrations, you’ll need to increase its schema version.
      */
     public string $schemaVersion = '1.0.0';
-    
+
     public ?string $developer = 'Fork Unstable Media GmbH';
 
     public ?string $developerUrl = 'https://fork.de';
@@ -65,7 +68,6 @@ class Embeds extends Plugin
     public ?string $documentationUrl = 'https://github.com/fork/craft-embeds';
 
     public ?string $changelogUrl = 'https://github.com/fork/craft-embeds/blob/master/CHANGELOG.md';
-
 
     // Public Methods
     // =========================================================================
@@ -79,7 +81,6 @@ class Embeds extends Plugin
      *
      * If you have a '/vendor/autoload.php' file, it will be loaded for you automatically;
      * you do not need to load it in your init() method.
-     *
      */
     public function init(): void
     {
@@ -97,26 +98,20 @@ class Embeds extends Plugin
 
             $view->registerJs("
             if (typeof \$R !== 'undefined') {
-			setTimeout(function() {
-				// get all editors with embeds fields
-				Craft.initEmbeds('$embedsName', '$embedsCopyName');
-
-			}, 500);
-
-			// TODO find a better way than timeout here too...
-			// setTimeout(function() {
-			//   // reset craft content changed javascript confirm popup
-			//   Craft.cp.initConfirmUnloadForms();
-			// }, 1500);
-		    }");
+                setTimeout(function() {
+                  // get all editors with embeds fields
+                  Craft.initEmbeds('{$embedsName}', '{$embedsCopyName}');
+                }, 500);
+            }");
         }
 
         Event::on(
             RedactorField::class,
             RedactorField::EVENT_REGISTER_PLUGIN_PATHS,
-            function (Event $event) {
+            function(RegisterPluginPathsEvent $event) {
                 // add redactor embed plugin assets to load paths
-                $event->paths[] = dirname(__DIR__).'/src/assetbundles/embeds/dist/redactor-plugin';
+                $event->paths[] = dirname(__DIR__) . '/src/assetbundles/embeds/dist/redactor-plugin';
+
                 return $event;
             }
         );
@@ -125,36 +120,38 @@ class Embeds extends Plugin
         Event::on(
             CraftVariable::class,
             CraftVariable::EVENT_INIT,
-            function (Event $event) {
+            function(Event $event) {
                 /** @var CraftVariable $variable */
                 $variable = $event->sender;
                 $variable->set('embeds', EmbedsVariable::class);
             }
         );
 
-/**
- * Logging in Craft involves using one of the following methods:
- *
- * Craft::trace(): record a message to trace how a piece of code runs. This is mainly for development use.
- * Craft::info(): record a message that conveys some useful information.
- * Craft::warning(): record a warning message that indicates something unexpected has happened.
- * Craft::error(): record a fatal error that should be investigated as soon as possible.
- *
- * Unless `devMode` is on, only Craft::warning() & Craft::error() will log to `craft/storage/logs/web.log`
- *
- * It's recommended that you pass in the magic constant `__METHOD__` as the second parameter, which sets
- * the category to the method (prefixed with the fully qualified class name) where the constant appears.
- *
- * To enable the Yii debug toolbar, go to your user account in the AdminCP and check the
- * [] Show the debug toolbar on the front end & [] Show the debug toolbar on the Control Panel
- *
- * http://www.yiiframework.com/doc-2.0/guide-runtime-logging.html
- */
+        /**
+         * Logging in Craft involves using one of the following methods:
+         *
+         * Craft::trace(): record a message to trace how a piece of code runs. This is mainly for development use.
+         * Craft::info(): record a message that conveys some useful information.
+         * Craft::warning(): record a warning message that indicates something unexpected has happened.
+         * Craft::error(): record a fatal error that should be investigated as soon as possible.
+         *
+         * Unless `devMode` is on, only Craft::warning() & Craft::error() will log to `craft/storage/logs/web.log`
+         *
+         * It's recommended that you pass in the magic constant `__METHOD__` as the second parameter, which sets
+         * the category to the method (prefixed with the fully qualified class name) where the constant appears.
+         *
+         * To enable the Yii debug toolbar, go to your user account in the AdminCP and check the
+         * [] Show the debug toolbar on the front end & [] Show the debug toolbar on the Control Panel
+         *
+         * http://www.yiiframework.com/doc-2.0/guide-runtime-logging.html
+         */
         Craft::info(
             Craft::t(
                 'embeds',
                 '{name} plugin loaded',
-                ['name' => $this->name]
+                [
+                    'name' => $this->name,
+                ]
             ),
             __METHOD__
         );
@@ -169,7 +166,7 @@ class Embeds extends Plugin
     /**
      * Creates and returns the model used to store the plugin’s settings.
      */
-    protected function createSettingsModel(): ?craft\base\Model
+    protected function createSettingsModel(): ?Model
     {
         return new Settings();
     }
@@ -185,7 +182,7 @@ class Embeds extends Plugin
         return Craft::$app->view->renderTemplate(
             'embeds/settings',
             [
-                'settings' => $this->getSettings()
+                'settings' => $this->getSettings(),
             ]
         );
     }

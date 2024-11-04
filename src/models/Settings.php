@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace fork\embeds\models;
 
-use Craft;
 use craft\base\Model;
 
 /**

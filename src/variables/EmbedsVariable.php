@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /**
  * Embeds plugin for Craft CMS 3.x
@@ -13,7 +14,6 @@ namespace fork\embeds\variables;
 
 use craft\base\Element;
 use fork\embeds\Embeds;
-
 
 /**
  * Embeds Variable
@@ -32,25 +32,25 @@ class EmbedsVariable
     // Public Methods
     // =========================================================================
 
-  /**
-   * Whatever you want to output to a Twig template can go into a Variable method.
-   * You can have as many variable functions as you want.  From any Twig template,
-   * call it like this:
-   *
-   *     {{ craft.embeds.exampleVariable }}
-   *
-   * Or, if your variable requires parameters from Twig:
-   *
-   *     {{ craft.embeds.exampleVariable(twigValue) }}
-   *
-   * @param Element $element
-   * @param array $ignoreFields
-   * @param int $nestingLevel
-   * @return array
-   * @throws \yii\base\InvalidConfigException
-   */
+    /**
+     * Whatever you want to output to a Twig template can go into a Variable method.
+     * You can have as many variable functions as you want.  From any Twig template,
+     * call it like this:
+     *
+     *     {{ craft.embeds.exampleVariable }}
+     *
+     * Or, if your variable requires parameters from Twig:
+     *
+     *     {{ craft.embeds.exampleVariable(twigValue) }}
+     *
+     * @param Element $element
+     * @param array $ignoreFields
+     * @param int $nestingLevel
+     * @return array
+     * @throws \yii\base\InvalidConfigException
+     */
     public function getElementData(Element $element, array $ignoreFields = [], int $nestingLevel = 0): array
     {
-      return Embeds::$plugin->embeds->getElementData($element, $ignoreFields, $nestingLevel);
+        return Embeds::$plugin->embeds->getElementData($element, $ignoreFields, $nestingLevel);
     }
 }
