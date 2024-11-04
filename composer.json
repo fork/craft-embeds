@@ -21,8 +21,7 @@
         "php": "^7.2 || ^8.0",
         "brainmaestro/composer-git-hooks": "^3.0",
         "craftcms/cms": "^3.0.0 || ^4.12.8",
-        "craftcms/redactor": "^2.1 || ^3.1",
-        "cweagans/composer-patches": "^1.7.3"
+        "craftcms/redactor": "^2.1 || ^3.1"
     },
     "autoload": {
         "psr-4": {
@@ -63,13 +62,7 @@
             "post-commit": [
                 ".githooks/post-commit"
             ]
-        },
-        "patches": {
-            "craftcms/ecs": {
-                "Craft 4.x compatibility": "patches/craft-ecs-v4.patch"
-            }
-        },
-        "enable-patching": true
+        }
     },
     "require-dev": {
         "craftcms/ecs": "dev-main",
@@ -83,7 +76,6 @@
     "config": {
         "allow-plugins": {
             "craftcms/plugin-installer": true,
-            "cweagans/composer-patches": true,
             "yiisoft/yii2-composer": true
         },
         "sort-packages": true,
