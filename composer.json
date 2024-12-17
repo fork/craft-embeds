@@ -19,7 +19,6 @@
     ],
     "require": {
         "php": "^8.0",
-        "brainmaestro/composer-git-hooks": "^3.0",
         "craftcms/cms": "^4.12.8",
         "craftcms/redactor": "^3.1"
     },
@@ -65,6 +64,7 @@
         }
     },
     "require-dev": {
+        "brainmaestro/composer-git-hooks": "^3.0",
         "craftcms/ecs": "dev-main",
         "craftcms/phpstan": "dev-main",
         "friendsofphp/php-cs-fixer": "^3.64",
