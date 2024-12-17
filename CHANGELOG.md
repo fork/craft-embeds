@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Fixed
 - ...
 
+## [3.0.1] - 2024-12-17
+### Fixed
+- Moved a dependency to dev
+
 ## [3.0.0] - 2024-12-17
 ### Changed
 - Drop support for PHP 7
