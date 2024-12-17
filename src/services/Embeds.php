@@ -285,7 +285,7 @@ class Embeds extends Component
 
                     case Matrix::class:
                         /** @var Matrix $field */
-                        if ($field->maxBlocks == 1) {
+                        if ($field->maxEntries == 1) {
                             $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel + 1) : null;
                         } else {
                             $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {

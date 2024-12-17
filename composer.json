@@ -67,6 +67,7 @@
         "brainmaestro/composer-git-hooks": "^3.0",
         "craftcms/ecs": "dev-main",
         "craftcms/phpstan": "dev-main",
+        "craftcms/rector": "dev-main",
         "friendsofphp/php-cs-fixer": "^3.64",
         "phpmd/phpmd": "^2.15",
         "phpstan/phpstan": "^1.12.7",
