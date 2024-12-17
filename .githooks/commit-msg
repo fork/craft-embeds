@@ -18,7 +18,7 @@ commit_msg_file=$(git rev-parse --git-dir)/COMMIT_EDITMSG
 commit_msg=$(cat "$commit_msg_file")
 
 # Regular expression pattern for conventional commit format
-pattern="^(build|ci|docs|feat|fix|perf|refactor|style|test|wip|chore|revert|release)(\(.+\))?: .{1,}"
+pattern="^(build|ci|docs|feat|fix|perf|refactor|style|test|chore|revert|release|BREAKING CHANGE)(\(.+\))?: .{1,}"
 
 # Check if the commit message matches the pattern
 if [[ ! $commit_msg =~ $pattern ]]; then

@@ -4,13 +4,13 @@
   </a>
 </div>
 
-# Embeds plugin for Craft CMS 3.x and 4.x
+# Embeds plugin for Craft CMS 4.x
 
 Allow using Embeds within Redactor. Embeds are referenced Matrix Blocks within the Redactor body.
 
 ## Requirements
 
-This plugin requires Craft CMS 3.0 or 4.0 and the Craft Redactor plugin.
+This plugin requires Craft CMS 4.12.8 or later and the Craft Redactor plugin.
 The plugin has not been tested with current Craft CMS 5.0.
 
 ## Installation

@@ -22,11 +22,16 @@ use fork\embeds\assetbundles\embeds\EmbedsAsset;
 use fork\embeds\models\Settings;
 use fork\embeds\services\Embeds as EmbedsService;
 use fork\embeds\variables\EmbedsVariable;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 use yii\base\Event;
+use yii\base\Exception;
+use yii\base\InvalidConfigException;
 
 /**
  * Craft plugins are very much like little applications in and of themselves. We’ve made
- * it as simple as we can, but the training wheels are off. A little prior knowledge is
+ * it as simple as we can, but the training wheels are off. Little prior knowledge is
  * going to be required to write a plugin.
  *
  * For the purposes of the plugin docs, we’re going to assume that you know PHP and SQL,
@@ -81,6 +86,7 @@ class Embeds extends Plugin
      *
      * If you have a '/vendor/autoload.php' file, it will be loaded for you automatically;
      * you do not need to load it in your init() method.
+     * @throws InvalidConfigException
      */
     public function init(): void
     {
@@ -100,7 +106,7 @@ class Embeds extends Plugin
             if (typeof \$R !== 'undefined') {
                 setTimeout(function() {
                   // get all editors with embeds fields
-                  Craft.initEmbeds('{$embedsName}', '{$embedsCopyName}');
+                  Craft.initEmbeds('$embedsName', '$embedsCopyName');
                 }, 500);
             }");
         }
@@ -176,6 +182,10 @@ class Embeds extends Plugin
      * block on the settings page.
      *
      * @return string The rendered settings HTML
+     * @throws LoaderError
+     * @throws RuntimeError
+     * @throws SyntaxError
+     * @throws Exception
      */
     protected function settingsHtml(): string
     {

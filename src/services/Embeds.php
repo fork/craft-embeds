@@ -18,6 +18,7 @@ use craft\elements\Category;
 use craft\elements\db\MatrixBlockQuery;
 use craft\elements\Entry;
 use craft\elements\MatrixBlock;
+use craft\errors\InvalidFieldException;
 use craft\fields\Assets;
 use craft\fields\Categories;
 use craft\fields\Checkboxes;
@@ -35,6 +36,7 @@ use craft\redactor\Field;
 use craft\redactor\FieldData;
 
 use DateTime;
+use yii\base\InvalidConfigException;
 
 /**
  * Embeds Service
@@ -53,21 +55,21 @@ class Embeds extends Component
      *
      * @var string
      */
-    public $embedsCopyFieldName = 'embedsCopy';
+    public string $embedsCopyFieldName = 'embedsCopy';
 
     /**
      * The name of the embeds matrix field
      *
      * @var string
      */
-    public $embedsFieldName = 'embeds';
+    public string $embedsFieldName = 'embeds';
 
     /**
      * The format to use for date(time) fields
      *
      * @var string
      */
-    public $dateFormat = 'default';
+    public string $dateFormat = 'default';
 
     // Public Methods
     // =========================================================================
@@ -90,6 +92,8 @@ class Embeds extends Component
      * @param string $embedsCopy
      * @param MatrixBlock[] $embeds
      * @return array
+     * @throws InvalidConfigException
+     * @throws InvalidFieldException
      */
     private function mergeEmbeds(string $embedsCopy, array $embeds): array
     {
@@ -112,10 +116,9 @@ class Embeds extends Component
                     'type' => "embedPlaceholder",
                 ];
             }
-        };
+        }
 
         $embedBlocks = [];
-        /** @var MatrixBlock $embed */
         foreach ($embeds as $embed) {
             $type = $embed->type->handle;
             $embedBlocks[] = [
@@ -141,7 +144,8 @@ class Embeds extends Component
      * @param DateTime $dateTime
      * @param bool $date
      * @param bool $time
-     * @return array
+     * @return array|string
+     * @throws InvalidConfigException
      */
     public function convertDateTime(DateTime $dateTime, $date = true, $time = true): array|string
     {
@@ -179,6 +183,8 @@ class Embeds extends Component
      * @param array $ignoreFields
      * @param int $nestingLevel
      * @return array
+     * @throws InvalidConfigException
+     * @throws InvalidFieldException
      */
     public function getElementData(Element $element, array $ignoreFields = [], int $nestingLevel = 0): array
     {
@@ -266,18 +272,9 @@ class Embeds extends Component
             if (!in_array($field->handle, array_merge([$this->embedsFieldName, $this->embedsCopyFieldName], $ignoreFields))) {
                 switch (get_class($field)) {
                     case Assets::class:
-                        if ($field->maxRelations && $field->maxRelations == 1) {
-                            $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel + 1) : null;
-                        } else {
-                            $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
-                                return $this->getElementData($elem, $ignoreFields, $nestingLevel + 1);
-                            }, $element->getFieldValue($field->handle)->all());
-                        }
-                        break;
-
                     case Categories::class:
                     case Entries::class:
-                        if ($field->maxRelations && $field->maxRelations == 1) {
+                        if ($field->maxRelations == 1) {
                             $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel + 1) : null;
                         } else {
                             $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
@@ -288,7 +285,7 @@ class Embeds extends Component
 
                     case Matrix::class:
                         /** @var Matrix $field */
-                        if ($field->maxBlocks && $field->maxBlocks == 1) {
+                        if ($field->maxBlocks == 1) {
                             $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel + 1) : null;
                         } else {
                             $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
@@ -337,7 +334,7 @@ class Embeds extends Component
 
                     case Date::class:
                         /** @var Date $field */
-                        /** @var \DateTime $date */
+                        /** @var DateTime $date */
                         $date = $element->getFieldValue($field->handle);
                         $data[$field->handle] = $this->convertDateTime($date, $field->showDate, $field->showTime);
                         break;
