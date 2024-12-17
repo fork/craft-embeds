@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Fixed
 - ...
 
+## [3.0.0] - 2024-12-17
+### Changed
+- Drop support for PHP 7
+- Drop support for Craft 3
+
 ## [2.0.0] - 2024-11-04
 ### Changed
 - Simply allow installation under Craft 4.x together with Redactor 3.x

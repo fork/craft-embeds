@@ -32,10 +32,9 @@ To install the plugin, follow these instructions.
        ]
    }
    ```
-3. Then tell Composer to load the plugin. For Craft 3.x use the v1.x and for Craft 4.x use v2.x
+3. Then tell Composer to load the plugin.
    ```
-   composer require fork/embeds:^1.0
-   composer require fork/embeds:^2.0
+   composer require fork/embeds
    ```
 4. In the Control Panel, go to Settings → Plugins and click the “Install” button for Embeds. This will also install
    Redactor if it wasn't already installed before.
