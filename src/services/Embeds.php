@@ -15,9 +15,8 @@ use craft\base\Component;
 use craft\base\Element;
 use craft\elements\Asset;
 use craft\elements\Category;
-use craft\elements\db\MatrixBlockQuery;
+use craft\elements\db\EntryQuery;
 use craft\elements\Entry;
-use craft\elements\MatrixBlock;
 use craft\errors\InvalidFieldException;
 use craft\fields\Assets;
 use craft\fields\Categories;
@@ -90,7 +89,7 @@ class Embeds extends Component
 
     /**
      * @param string $embedsCopy
-     * @param MatrixBlock[] $embeds
+     * @param Entry[] $embeds
      * @return array
      * @throws InvalidConfigException
      * @throws InvalidFieldException
@@ -147,7 +146,7 @@ class Embeds extends Component
      * @return array|string
      * @throws InvalidConfigException
      */
-    public function convertDateTime(DateTime $dateTime, $date = true, $time = true): array|string
+    public function convertDateTime(DateTime $dateTime, bool $date = true, bool $time = true): array|string
     {
         if ($this->dateFormat !== 'default') {
             return Craft::$app->getFormatter()->asDate($dateTime, $this->dateFormat);
@@ -232,14 +231,6 @@ class Embeds extends Component
                 ];
                 break;
 
-            case MatrixBlock::class:
-                /** @var MatrixBlock $element */
-                $data = [
-                    'id' => $element->id,
-                    'type' => $element->type->handle,
-                ];
-                break;
-
             default:
                 $data = [
                     'id' => $element->id,
@@ -259,7 +250,7 @@ class Embeds extends Component
                 $content = $copy->getParsedContent();
             }
 
-            /** @var MatrixBlockQuery $embeds */
+            /** @var EntryQuery $embeds */
             $embeds = $element->{$this->embedsFieldName};
             $data['embeds'] = $this->mergeEmbeds($content, $embeds->all());
         }
