@@ -4,13 +4,14 @@
   </a>
 </div>
 
-# Embeds plugin for Craft CMS 3.x
+# Embeds plugin for Craft CMS 3.x and 4.x
 
 Allow using Embeds within Redactor. Embeds are referenced Matrix Blocks within the Redactor body.
 
 ## Requirements
 
-This plugin requires Craft CMS 3.0.0-beta.23 or later and the Craft Redactor plugin.
+This plugin requires Craft CMS 3.0 or 4.0 and the Craft Redactor plugin.
+The plugin has not been tested with current Craft CMS 5.0.
 
 ## Installation
 
@@ -31,9 +32,10 @@ To install the plugin, follow these instructions.
        ]
    }
    ```
-3. Then tell Composer to load the plugin:
+3. Then tell Composer to load the plugin. For Craft 3.x use the v1.x and for Craft 4.x use v2.x
    ```
-   composer require fork/embeds
+   composer require fork/embeds:^1.0
+   composer require fork/embeds:^2.0
    ```
 4. In the Control Panel, go to Settings → Plugins and click the “Install” button for Embeds. This will also install
    Redactor if it wasn't already installed before.

@@ -15,6 +15,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Fixed
 - ...
 
+## [2.0.0] - 2024-11-04
+### Changed
+- Simply allow installation under Craft 4.x together with Redactor 3.x
+- Allow installation under more recent versions of PHP
+- Fix method footprint to match parent class(es)
+- Make classes strict-typed
+
+## [2.0-beta]   - 2024-11-01
+### Changed
+- Simply allow installation under Craft 4.x and with Redactor 3.x
+
 ## [1.1.4.3] - 2024-04-17
 ### Added
 - check for author in element

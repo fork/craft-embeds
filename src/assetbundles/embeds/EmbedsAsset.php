@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Plugin for Craft CMS 3.x
  *
@@ -10,7 +12,6 @@
 
 namespace fork\embeds\assetbundles\embeds;
 
-use Craft;
 use craft\redactor\assets\redactor\RedactorAsset;
 use craft\web\AssetBundle;
 use craft\web\assets\cp\CpAsset;

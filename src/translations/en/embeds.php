@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Embeds plugin for Craft CMS 3.x
  *
