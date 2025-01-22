@@ -30,6 +30,7 @@ use craft\fields\MultiSelect;
 use craft\fields\RadioButtons;
 use craft\fields\Tags;
 use craft\fields\Users;
+use craft\helpers\DateTimeHelper;
 use craft\models\FieldLayout;
 use craft\redactor\Field;
 use craft\redactor\FieldData;
@@ -338,7 +339,7 @@ class Embeds extends Component
                     case Date::class:
                         /** @var Date $field */
                         /** @var \DateTime $date */
-                        $date = $element->getFieldValue($field->handle);
+                        $date = DateTimeHelper::toDateTime($element->getFieldValue($field->handle));
                         $data[$field->handle] = $this->convertDateTime($date, $field->showDate, $field->showTime);
                         break;
 
