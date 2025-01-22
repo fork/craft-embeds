@@ -351,9 +351,9 @@ class Embeds extends Component
                         break;
 
                     case Field::class:
-                        /** @var FieldData $copy */
+                        /** @var FieldData|null $copy */
                         $copy = $element->getFieldValue($field->handle);
-                        $content = $copy->getParsedContent();
+                        $content = ($copy === null) ? "" : $copy->getParsedContent();
                         $copy = str_replace("\n", "", $content);
                         $data[$field->handle] = $copy;
                         break;
