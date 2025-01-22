@@ -338,9 +338,9 @@ class Embeds extends Component
 
                     case Date::class:
                         /** @var Date $field */
-                        /** @var \DateTime $date */
+                        /** @var \DateTime|null $date */
                         $date = DateTimeHelper::toDateTime($element->getFieldValue($field->handle));
-                        $data[$field->handle] = $this->convertDateTime($date, $field->showDate, $field->showTime);
+                        $data[$field->handle] = ($date instanceof DateTime) ? $this->convertDateTime($date, $field->showDate, $field->showTime) : null;
                         break;
 
                     case Color::class:
