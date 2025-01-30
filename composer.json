@@ -19,6 +19,7 @@
     ],
     "require": {
         "php": "^8.2",
+        "craftcms/ckeditor": "^4.0",
         "craftcms/cms": "^5.0",
         "craftcms/redactor": "^4.2"
     },
