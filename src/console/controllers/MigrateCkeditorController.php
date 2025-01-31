@@ -73,21 +73,21 @@ class MigrateCkeditorController extends Controller
                 ->type($entryType)
                 ->siteId('*')
                 ->status(null)
-                ->drafts(null)
-                ->revisions(null)
                 ->collect();
 
             foreach ($entries as $i => $entry) {
                 $this->output(sprintf("\t(%d/%d) Migrating %8d %s...", $i + 1, $entries->count(), $entry->id, $entry->title));
 
-                $copy = $entry->getFieldValue($copyField->handle);
+                $fieldLayout = $entry->getFieldLayout();
+
+                $copy = $entry->getFieldValue($fieldLayout->getFieldByUid($copyField->uid)->handle);
                 $copy = str_replace("\n", "", $copy);
                 $copy = preg_replace('/<p><br \/><\/p>/', '', $copy);
                 $split = preg_split('/(<!--pagebreak-->|<hr class=\"redactor_pagebreak\"[^>]*>)/', $copy);
                 $embedsCount = count($split) - 1;
 
                 /** @var ElementCollection<Matrix> $embeds */
-                $embeds = $entry->getFieldValue($embedsField->handle)->status(null)->collect();
+                $embeds = $entry->getFieldValue($fieldLayout->getFieldByUid($embedsField->uid)->handle)->status(null)->collect();
                 $enabledEmbedsCount = 0;
                 $embeds = $embeds->each(
                     function(Entry $embed) use ($copyField, $embedsCount, &$enabledEmbedsCount) {
