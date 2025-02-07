@@ -8,6 +8,7 @@ use Craft;
 use craft\ckeditor\Field as CKEditorField;
 use craft\ckeditor\Plugin;
 use craft\console\Controller;
+use craft\elements\db\EntryQuery;
 use craft\elements\ElementCollection;
 use craft\elements\Entry;
 use craft\errors\ElementNotFoundException;
@@ -45,7 +46,6 @@ class MigrateCkeditorController extends Controller
      * @return int
      * @throws InvalidFieldException
      * @throws Throwable
-     * @throws ElementNotFoundException
      * @throws Exception
      */
     public function actionIndex(): int
@@ -56,7 +56,7 @@ class MigrateCkeditorController extends Controller
         $embedsField = Craft::$app->fields->getFieldByHandle($this->embedsField);
 
         if (Craft::$app->config->general->allowAdminChanges) {
-            $this->output("Updating settings on copy field and it's config.");
+            $this->stdout("Updating settings on copy field and it's config...", BaseConsole::FG_CYAN);
             $ckeditorConfig = Plugin::getInstance()->ckeConfigs->getByUid($copyField->ckeConfig);
             if (!in_array('createEntry', $ckeditorConfig->toolbar)) {
                 $ckeditorConfig->toolbar[] = '|';
@@ -65,18 +65,23 @@ class MigrateCkeditorController extends Controller
             }
             $copyField->setEntryTypes($embedsField->getEntryTypes());
             Craft::$app->fields->saveField($copyField);
+
+            $this->stdout(" done." . PHP_EOL, BaseConsole::FG_GREEN);
         }
 
         foreach ($this->entryTypes($copyField, $embedsField) as $entryType) {
-            $this->output(sprintf("Migrating Embeds for entries of type %s:\n", $entryType->name));
+            $this->stdout(sprintf("Migrating Embeds for entries of type %s:" . PHP_EOL, $entryType->name), BaseConsole::FG_CYAN);
             $entries = Entry::find()
                 ->type($entryType)
                 ->siteId('*')
+                ->drafts(null)
+                ->revisions(null)
+                ->trashed(null)
                 ->status(null)
                 ->collect();
 
             foreach ($entries as $i => $entry) {
-                $this->output(sprintf("\t(%d/%d) Migrating %8d %s...", $i + 1, $entries->count(), $entry->id, $entry->title));
+                $this->stdout(sprintf("\t(%d/%d) Migrating %d %s...", $i + 1, $entries->count(), $entry->id, $entry->title));
 
                 $fieldLayout = $entry->getFieldLayout();
 
@@ -86,8 +91,11 @@ class MigrateCkeditorController extends Controller
                 $split = preg_split('/(<!--pagebreak-->|<hr class=\"redactor_pagebreak\"[^>]*>)/', $copy);
                 $embedsCount = count($split) - 1;
 
-                /** @var ElementCollection<Matrix> $embeds */
-                $embeds = $entry->getFieldValue($fieldLayout->getFieldByUid($embedsField->uid)->handle)->status(null)->collect();
+                /** @var EntryQuery $embedsQuery */
+                $embedsQuery = $entry->getFieldValue($fieldLayout->getFieldByUid($embedsField->uid)->handle);
+                /** @var ElementCollection<Entry> $embeds */
+                $embeds = $embedsQuery->status(null)->fieldId([$embedsField->id, $copyField->id])->collect();
+
                 $enabledEmbedsCount = 0;
                 $embeds = $embeds->each(
                     function(Entry $embed) use ($copyField, $embedsCount, &$enabledEmbedsCount) {
@@ -121,15 +129,20 @@ class MigrateCkeditorController extends Controller
                 $entry->setFieldValue($copyField->handle, $merged->implode(''));
                 $entry->setFieldValue($embedsField->handle, []);
 
-                if (!Craft::$app->elements->saveElement($entry, false)) {
-                    $this->output(sprintf("Couldn't save %s\n", $entry->id));
+                try {
+                    if (!Craft::$app->elements->saveElement($entry, false)) {
+                        $this->stdout(sprintf("Couldn't save %s", $entry->id), BaseConsole::FG_RED);
 
-                    return ExitCode::UNSPECIFIED_ERROR;
+                        return ExitCode::UNSPECIFIED_ERROR;
+                    }
+                } catch (ElementNotFoundException $e) {
+                    $this->stdout(sprintf("Couldn't save %s, probably because it is a revision that was deleted in the meantime", $entry->id), BaseConsole::FG_YELLOW);
                 }
 
-                $this->output("\tdone.", BaseConsole::FG_GREEN);
+                $this->stdout(" done." . PHP_EOL, BaseConsole::FG_GREEN);
             }
-            $this->output("\n");
+
+            $this->stdout(PHP_EOL);
         }
 
         return ExitCode::OK;
