@@ -180,7 +180,7 @@ class Embeds extends Component
      * @param int $nestingLevel
      * @return array
      */
-    public function getElementData(Element $element, array $ignoreFields = [], int $nestingLevel = 0): array
+    public function getElementData(Element $element, array $ignoreFields = [], int $nestingLevel = 0, int $maxNestingLevel = 5): array
     {
         // Handle different element types and set their specific attributes
         switch (get_class($element)) {
@@ -241,7 +241,7 @@ class Embeds extends Component
                 break;
         }
 
-        if ($nestingLevel >= 5) {
+        if ($nestingLevel >= $maxNestingLevel) {
             return $data;
         }
 
@@ -262,10 +262,10 @@ class Embeds extends Component
                 switch (get_class($field)) {
                     case Assets::class:
                         if ($field->limit && $field->limit == 1) {
-                            $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel+1) : null;
+                            $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel+1, $maxNestingLevel) : null;
                         } else {
-                            $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
-                                return $this->getElementData($elem, $ignoreFields, $nestingLevel+1);
+                            $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel, $maxNestingLevel) {
+                                return $this->getElementData($elem, $ignoreFields, $nestingLevel+1, $maxNestingLevel);
                             }, $element->getFieldValue($field->handle)->all());
                         }
                         break;
@@ -273,10 +273,10 @@ class Embeds extends Component
                     case Categories::class:
                     case Entries::class:
                         if ($field->limit && $field->limit == 1) {
-                            $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel+1) : null;
+                            $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel+1, $maxNestingLevel) : null;
                         } else {
-                            $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
-                                return $this->getElementData($elem, $ignoreFields, $nestingLevel+1);
+                            $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel, $maxNestingLevel) {
+                                return $this->getElementData($elem, $ignoreFields, $nestingLevel+1, $maxNestingLevel);
                             }, $element->getFieldValue($field->handle)->all());
                         }
                         break;
@@ -284,10 +284,10 @@ class Embeds extends Component
                     case Matrix::class:
                         /** @var Matrix $field */
                         if ($field->maxBlocks && $field->maxBlocks == 1) {
-                            $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel+1) : null;
+                            $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel+1, $maxNestingLevel) : null;
                         } else {
-                            $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
-                                return $this->getElementData($elem, $ignoreFields, $nestingLevel+1);
+                            $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel, $maxNestingLevel) {
+                                return $this->getElementData($elem, $ignoreFields, $nestingLevel+1, $maxNestingLevel);
                             }, $element->getFieldValue($field->handle)->all());
                         }
                         break;
