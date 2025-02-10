@@ -91,7 +91,7 @@ class Embeds extends Component
      * @param MatrixBlock[] $embeds
      * @return array
      */
-    private function mergeEmbeds(string $embedsCopy, array $embeds): array
+    private function mergeEmbeds(string $embedsCopy, array $embeds, array $ignoreFields = [], int $nestingLevel = 0, int $maxNestingLevel = 5): array
     {
         // Handle copy
         $embedsCopy = str_replace("\n", "", $embedsCopy);
@@ -120,7 +120,7 @@ class Embeds extends Component
             $type = $embed->type->handle;
             $embedBlocks[] = [
                 'type' => $type,
-                'data' => $this->getElementData($embed)
+                'data' => $this->getElementData($embed, $ignoreFields, $nestingLevel, $maxNestingLevel)
             ];
         }
 
@@ -250,7 +250,7 @@ class Embeds extends Component
             $copy = $element->{$this->embedsCopyFieldName};
             /** @var MatrixBlockQuery $embeds */
             $embeds = $element->{$this->embedsFieldName};
-            $data['embeds'] = $this->mergeEmbeds($copy->getParsedContent(), $embeds->all());
+            $data['embeds'] = $this->mergeEmbeds($copy->getParsedContent(), $embeds->all(), $ignoreFields, $nestingLevel, $maxNestingLevel);
         }
 
         /** @var FieldLayout $fieldLayout */
