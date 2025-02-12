@@ -245,8 +245,7 @@ class Embeds extends Component
             return $data;
         }
 
-        /** I'm assuming that only the root elements embeds are used - no *.jsx file in the frontend matches 'embed' */
-        if ($nestingLevel === 0 && $element->{$this->embedsFieldName} && $element->{$this->embedsCopyFieldName}) {
+        if ($element->{$this->embedsFieldName} && $element->{$this->embedsCopyFieldName}) {
             /** @var FieldData $copy */
             $copy = $element->{$this->embedsCopyFieldName};
             /** @var MatrixBlockQuery $embeds */
