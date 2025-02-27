@@ -4,69 +4,67 @@
   </a>
 </div>
 
-# Embeds plugin for Craft CMS 4.x
+# Embeds plugin for Craft CMS 5.x
 
-Allow using Embeds within Redactor. Embeds are referenced Matrix Blocks within the Redactor body.
+NOTE: This Plugin is not meant for actual use with Craft 5. The current release includes a script for migrating
+embeds to CKEditor with inline blocks.
 
 ## Requirements
 
-This plugin requires Craft CMS 4.12.8 or later and the Craft Redactor plugin.
-The plugin has not been tested with current Craft CMS 5.0.
+This plugin requires Craft CMS 5 or later and the Craft Redactor and CKEditor plugins.
+The plugin is not actually working with current Craft CMS 5.0.
 
-## Installation
+## Migrating to CKEditor
 
-To install the plugin, follow these instructions.
+In order to migrate your embeds fields to CKEditor fields with inline blocks, do the following steps:
 
-1. Open your terminal and go to your Craft project:
-   ```
-   cd /path/to/project
-   ```
-2. (As long as this is unreleased) Add the repository to your composer.json:
-   ```
-   {
-       "repositories": [
-           {
-               "type": "vcs",
-               "url":  "git@github.com:fork/craft-embeds.git"
-           }
-       ]
-   }
-   ```
-3. Then tell Composer to load the plugin.
-   ```
-   composer require fork/embeds
-   ```
-4. In the Control Panel, go to Settings → Plugins and click the “Install” button for Embeds. This will also install
-   Redactor if it wasn't already installed before.
+1. Install the CKEditor plugin, if not done already
+2. Migrate all your Redactor fields to CKEditor fields and ignore the warnings about missing config settings for the
+embeds plugin
+3. Check your htmlpurifier config. Remove `"AutoFormat.RemoveEmpty": true,`, if given. This setting causes the purifier
+to remove Entry blocks from inside the CKEditor content.
+4. Run `php craft gc/run`! The migration script might encounter errors if you don't.
+5. In your local environment, run `php craft embeds/migrate-ckeditor [--copy-field=embedsCopy] [--embeds-field=embeds]`.
+This might take a while because the script handles every entry, draft and revision with these fields. Run this script
+for every combination of Embeds and Embeds Copy field that you have and note every one of those.
+6. Adjust your rendering code to the new CKEditor field (See below).
+7. Commit and deploy the changes made to the project config. (It should at least add the `createEntry` Button to the
+CKEditor config)
+8. Run the scripts from steps no. 4 and 5 in every other environment after deploying.
+9. You should now have CKEditor fields with your old embeds as inline blocks in the correct position inside the content.
+10. After everything is deployed, you can remove the old Embeds Matrix field and the Embeds plugin.
 
-5. Enable the plugin in redactor by putting it into your config/redactor/MyConfig.json (see [Embeds.json](src/config/redactor/Embeds.json))
+### Rendering with CKEditor
 
-## Embeds Overview
+The `mergeEmbeds()` function won't work anymore. And you'll eventually remove this plugin completely. So
+rendering is up to you now. The following code example might help you as a starter:
 
-This plugin adds a Redactor plugin which enables editors to set markers between paragraphs in a redactor field. These
-markers then work as placeholders for blocks from a matrix field (_embeds_). In the current development phase, this
-plugin only supports one redactor field and one matrix field whit the names _embedsCopy_ and _embeds_. The install
-migration of the plugin creates these fields automatically and also adds a Redactor configuration file for the copy
-field. **Warning**: Renaming the handles of these fields breaks the plugin! The matrix field will be empty. Redactor
-will be installed automatically by the install migration of this plugin.
+```php
+        # $field is your CKEditor field
+        $chunks = [];
+        foreach ($field->getChunks() as $chunk) {
+            if ($chunk instanceof craft\ckeditor\data\Markup) {
+                $chunks[] = [
+                    'type' => "copy",
+                    'html' => $chunk->getHtml(),
+                ];
+            } else {
+                /** @var craft\ckeditor\data\Entry $chunk */
+                $embed = $chunk->getEntry();
+                $type = rtrim($embed->type->handle);
+                $embedData = $this->handleEmbed($embed); // This is where you handle your embeds
+                $chunks[] = [
+                    'type' => $type,
+                    'data' => $embedData,
+                ];
+            }
+        }
 
-## Configuring Embeds
+        return $chunks;
+```
 
-Currently there are no configuration options.
-
-## Using Embeds
-
-Add the two fields to any of your EntryTypes' FieldLayout and don't forget to add some MatrixBlocks to the embeds field.
-When you add an embed marker to the copy text and add blocks to the matrix field, the plugin will show you which embed
-will appear at which placeholder.
-
-## Embeds Roadmap
-
-Some things to do, and ideas for potential features:
-
-- Fix the merging of copy and embeds
-- Enable using multiple fields via plugin settings
-- Evaluate possibilities for adding srcsets
+Another approach would be to switch to using
+[Partials](https://craftcms.com/docs/5.x/system/elements.html#element-partials) for rendering.
 
 <div align="center">
   <img src="./assets/heart.png" width="38" height="41" alt="Fork Logo" />

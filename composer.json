@@ -2,7 +2,7 @@
     "name": "fork/embeds",
     "description": "Allow using Embeds within Redactor. Embeds are referenced Matrix Blocks within the Redactor body.",
     "type": "craft-plugin",
-    "version": "3.0.1",
+    "version": "4.0.0",
     "keywords": [
         "craft",
         "cms",
@@ -18,9 +18,10 @@
         }
     ],
     "require": {
-        "php": "^8.0",
-        "craftcms/cms": "^4.12.8",
-        "craftcms/redactor": "^3.1"
+        "php": "^8.2",
+        "craftcms/ckeditor": "^4.0",
+        "craftcms/cms": "^5.0",
+        "craftcms/redactor": "^4.2"
     },
     "autoload": {
         "psr-4": {
@@ -67,6 +68,7 @@
         "brainmaestro/composer-git-hooks": "^3.0",
         "craftcms/ecs": "dev-main",
         "craftcms/phpstan": "dev-main",
+        "craftcms/rector": "dev-main",
         "friendsofphp/php-cs-fixer": "^3.64",
         "phpmd/phpmd": "^2.15",
         "phpstan/phpstan": "^1.12.7",
