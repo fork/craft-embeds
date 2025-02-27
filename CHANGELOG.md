@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Fixed
 - ...
 
+## [4.0.0] - 2025-02-27
+### Added
+- Add support for Craft 5, drop support for Craft 4
+- Add script for migration to CKEditor with inline blocks
+
 ## [3.0.1] - 2024-12-17
 ### Fixed
 - Moved a dependency to dev
