@@ -1,6 +1,4 @@
 <?php
-
-declare(strict_types=1);
 /**
  * Embeds Services
  *
@@ -30,7 +28,6 @@ use craft\fields\MultiSelect;
 use craft\fields\RadioButtons;
 use craft\fields\Tags;
 use craft\fields\Users;
-use craft\helpers\DateTimeHelper;
 use craft\models\FieldLayout;
 use craft\redactor\Field;
 use craft\redactor\FieldData;
@@ -69,7 +66,7 @@ class Embeds extends Component
      * @var string
      */
     public $dateFormat = 'default';
-
+    
     // Public Methods
     // =========================================================================
 
@@ -92,7 +89,7 @@ class Embeds extends Component
      * @param MatrixBlock[] $embeds
      * @return array
      */
-    private function mergeEmbeds(string $embedsCopy, array $embeds): array
+    private function mergeEmbeds(string $embedsCopy, array $embeds, array $ignoreFields = [], int $nestingLevel = 0, int $maxNestingLevel = 5): array
     {
         // Handle copy
         $embedsCopy = str_replace("\n", "", $embedsCopy);
@@ -121,7 +118,7 @@ class Embeds extends Component
             $type = $embed->type->handle;
             $embedBlocks[] = [
                 'type' => $type,
-                'data' => $this->getElementData($embed),
+                'data' => $this->getElementData($embed, $ignoreFields, $nestingLevel, $maxNestingLevel),
             ];
         }
 
@@ -142,9 +139,9 @@ class Embeds extends Component
      * @param DateTime $dateTime
      * @param bool $date
      * @param bool $time
-     * @return array
+     * @return array|string
      */
-    public function convertDateTime(DateTime $dateTime, $date = true, $time = true): array|string
+    public function convertDateTime(DateTime $dateTime, bool $date = true, bool $time = true): array|string
     {
         if ($this->dateFormat !== 'default') {
             return Craft::$app->getFormatter()->asDate($dateTime, $this->dateFormat);
@@ -181,8 +178,9 @@ class Embeds extends Component
      * @param int $nestingLevel
      * @return array
      */
-    public function getElementData(Element $element, array $ignoreFields = [], int $nestingLevel = 0): array
+    public function getElementData(Element $element, array $ignoreFields = [], int $nestingLevel = 0, int $maxNestingLevel = 5): array
     {
+        $data = [];
         // Handle different element types and set their specific attributes
         switch (get_class($element)) {
             case Asset::class:
@@ -220,7 +218,7 @@ class Embeds extends Component
                     'uri' => $element->uri,
                     'status' => $element->status,
                     'authorId' => $element->section->type == "single" ? null : $element->author?->id,
-                    'postDate' => !is_null($element->postDate) ? $this->convertDateTime($element->postDate) : null,
+                    'postDate' => $this->convertDateTime($element->postDate),
                     'section' => $element->section->handle,
                     'dateCreated' => $this->convertDateTime($element->dateCreated),
                     'dateUpdated' => $this->convertDateTime($element->dateUpdated),
@@ -242,21 +240,17 @@ class Embeds extends Component
                 break;
         }
 
-        if ($nestingLevel >= 5) {
+        if ($nestingLevel >= $maxNestingLevel) {
             return $data;
         }
 
-        if ($element->{$this->embedsFieldName} && $element->{$this->embedsCopyFieldName}) {
-            $content = "";
-            if ($element->{$this->embedsCopyFieldName} !== null) {
-                /** @var FieldData $copy */
-                $copy = $element->{$this->embedsCopyFieldName};
-                $content = $copy->getParsedContent();
-            }
-
+        // only root level embeds should be considered
+        if ($nestingLevel === 0 && $element->{$this->embedsFieldName} && $element->{$this->embedsCopyFieldName}) {
+            /** @var FieldData $copy */
+            $copy = $element->{$this->embedsCopyFieldName};
             /** @var MatrixBlockQuery $embeds */
             $embeds = $element->{$this->embedsFieldName};
-            $data['embeds'] = $this->mergeEmbeds($content, $embeds->all());
+            $data['embeds'] = $this->mergeEmbeds($copy->getParsedContent(), $embeds->all(), $ignoreFields, $nestingLevel, $maxNestingLevel);
         }
 
         /** @var FieldLayout $fieldLayout */
@@ -267,18 +261,9 @@ class Embeds extends Component
             if (!in_array($field->handle, array_merge([$this->embedsFieldName, $this->embedsCopyFieldName], $ignoreFields))) {
                 switch (get_class($field)) {
                     case Assets::class:
-                        if ($field->maxRelations && $field->maxRelations == 1) {
-                            $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel + 1) : null;
-                        } else {
-                            $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
-                                return $this->getElementData($elem, $ignoreFields, $nestingLevel + 1);
-                            }, $element->getFieldValue($field->handle)->all());
-                        }
-                        break;
-
                     case Categories::class:
                     case Entries::class:
-                        if ($field->maxRelations && $field->maxRelations == 1) {
+                        if ($field->maxRelations == 1) {
                             $data[$field->handle] = $element->getFieldValue($field->handle)->one() ? $this->getElementData($element->getFieldValue($field->handle)->one(), $ignoreFields, $nestingLevel + 1) : null;
                         } else {
                             $data[$field->handle] = array_map(function($elem) use ($ignoreFields, $nestingLevel) {
@@ -338,9 +323,9 @@ class Embeds extends Component
 
                     case Date::class:
                         /** @var Date $field */
-                        /** @var \DateTime|null $date */
-                        $date = DateTimeHelper::toDateTime($element->getFieldValue($field->handle));
-                        $data[$field->handle] = ($date instanceof DateTime) ? $this->convertDateTime($date, $field->showDate, $field->showTime) : null;
+                        /** @var DateTime $date */
+                        $date = $element->getFieldValue($field->handle);
+                        $data[$field->handle] = $this->convertDateTime($date, $field->showDate, $field->showTime);
                         break;
 
                     case Color::class:
@@ -352,9 +337,9 @@ class Embeds extends Component
                         break;
 
                     case Field::class:
-                        /** @var FieldData|null $copy */
+                        /** @var FieldData $copy */
                         $copy = $element->getFieldValue($field->handle);
-                        $content = ($copy === null) ? "" : $copy->getParsedContent();
+                        $content = $copy->getParsedContent();
                         $copy = str_replace("\n", "", $content);
                         $data[$field->handle] = $copy;
                         break;
@@ -364,6 +349,7 @@ class Embeds extends Component
                         break;
                 }
             }
+            return $data;
         }
         return $data;
     }
