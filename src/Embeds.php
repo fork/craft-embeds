@@ -100,7 +100,7 @@ class Embeds extends Plugin
             if (typeof \$R !== 'undefined') {
                 setTimeout(function() {
                   // get all editors with embeds fields
-                  Craft.initEmbeds('{$embedsName}', '{$embedsCopyName}');
+                  Craft.initEmbeds('$embedsName', '$embedsCopyName');
                 }, 500);
             }");
         }

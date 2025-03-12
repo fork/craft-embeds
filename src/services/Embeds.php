@@ -244,8 +244,7 @@ class Embeds extends Component
             return $data;
         }
 
-        // only root level embeds should be considered
-        if ($nestingLevel === 0 && $element->{$this->embedsFieldName} && $element->{$this->embedsCopyFieldName}) {
+        if ($element->{$this->embedsFieldName} && $element->{$this->embedsCopyFieldName}) {
             /** @var FieldData $copy */
             $copy = $element->{$this->embedsCopyFieldName};
             /** @var MatrixBlockQuery $embeds */
