@@ -14,6 +14,7 @@ use craft\elements\Entry;
 use craft\errors\ElementNotFoundException;
 use craft\errors\InvalidFieldException;
 use craft\fields\Matrix;
+use craft\helpers\FileHelper;
 use craft\models\EntryType;
 use Illuminate\Support\Collection;
 use Throwable;
@@ -31,6 +32,8 @@ class MigrateCkeditorController extends Controller
     public string $copyField = 'embedsCopy';
     public string $embedsField = 'embeds';
     public string|null $entryTypes = null;
+    public bool $clearEmbedsField = false;
+    public bool $reprocess = false;
 
     public function options($actionID): array
     {
@@ -38,6 +41,8 @@ class MigrateCkeditorController extends Controller
         $options[] = 'copyField';
         $options[] = 'embedsField';
         $options[] = 'entryTypes';
+        $options[] = 'clearEmbedsField';
+        $options[] = 'reprocess';
         return $options;
     }
 
@@ -57,11 +62,26 @@ class MigrateCkeditorController extends Controller
 
         if (Craft::$app->config->general->allowAdminChanges) {
             $this->stdout("Updating settings on copy field and it's config...", BaseConsole::FG_CYAN);
-            $ckeditorConfig = Plugin::getInstance()->ckeConfigs->getByUid($copyField->ckeConfig);
+            $ckeConfigs = Plugin::getInstance()->ckeConfigs;
+            $ckeditorConfig = null;
+
+            if ($copyField->ckeConfig) {
+                $ckeditorConfig = $ckeConfigs->getByUid($copyField->ckeConfig);
+            }
+
+            // Some projects have the CKEditor field's config unset. In that case, fall back to the first available config.
+            if ($ckeditorConfig === null) {
+                $allConfigs = $ckeConfigs->getAll();
+                if (empty($allConfigs)) {
+                    throw new Exception('No CKEditor configs found. Create one in the CP (Settings → CKEditor) and re-run this command.');
+                }
+                $ckeditorConfig = $allConfigs[0];
+                $copyField->ckeConfig = $ckeditorConfig->uid;
+            }
             if (!in_array('createEntry', $ckeditorConfig->toolbar)) {
                 $ckeditorConfig->toolbar[] = '|';
                 $ckeditorConfig->toolbar[] = 'createEntry';
-                Plugin::getInstance()->ckeConfigs->save($ckeditorConfig);
+                $ckeConfigs->save($ckeditorConfig);
             }
             $copyField->setEntryTypes($embedsField->getEntryTypes());
             Craft::$app->fields->saveField($copyField);
@@ -85,8 +105,50 @@ class MigrateCkeditorController extends Controller
 
                 $fieldLayout = $entry->getFieldLayout();
 
-                $copy = $entry->getFieldValue($fieldLayout->getFieldByUid($copyField->uid)->handle);
-                $copy = str_replace("\n", "", $copy);
+                $copyFieldLayoutElement = $fieldLayout->getFieldByUid($copyField->uid);
+                $copyFieldHandle = $copyFieldLayoutElement->handle;
+
+                // Backup the raw (unmodified) copy-field content once per entry, including any pagebreak markers.
+                // If a backup exists and reprocess=false (default), skip the entry.
+                // If reprocess=true, use the backup as source input so re-running is deterministic.
+                $embedsBackupDir = Craft::$app->getPath()->getStoragePath() . DIRECTORY_SEPARATOR . 'embeds';
+                FileHelper::createDirectory($embedsBackupDir);
+                $backupFilePath = $embedsBackupDir . DIRECTORY_SEPARATOR . sprintf(
+                    'entry-%d-site-%d-field-%s-fieldId-%d.txt',
+                    $entry->id,
+                    $entry->siteId,
+                    $copyFieldHandle,
+                    $copyField->id
+                );
+
+                // Migrate legacy backups (without siteId) to the new filename, so each site gets its own backup.
+                $legacyBackupFilePath = $embedsBackupDir . DIRECTORY_SEPARATOR . sprintf(
+                    'entry-%d-field-%s-fieldId-%d.txt',
+                    $entry->id,
+                    $copyFieldHandle,
+                    $copyField->id
+                );
+
+                if (!file_exists($backupFilePath) && file_exists($legacyBackupFilePath)) {
+                    rename($legacyBackupFilePath, $backupFilePath);
+                }
+
+                if (file_exists($backupFilePath) && !$this->reprocess) {
+                    $this->stdout(" skipped (backup exists)." . PHP_EOL, BaseConsole::FG_YELLOW);
+                    continue;
+                }
+
+                if (!file_exists($backupFilePath)) {
+                    $copy = (string)($entry->getFieldValue($copyFieldHandle) ?? '');
+                    file_put_contents($backupFilePath, $copy);
+                } else {
+                    $backupContents = file_get_contents($backupFilePath);
+                    $copy = $backupContents !== false
+                        ? $backupContents
+                        : (string)($entry->getFieldValue($copyFieldHandle) ?? '');
+                }
+
+                $copy = str_replace("\n", "", (string)$copy);
                 $copy = preg_replace('/<p><br \/><\/p>/', '', $copy);
                 $split = preg_split('/(<!--pagebreak-->|<hr class=\"redactor_pagebreak\"[^>]*>)/', $copy);
                 $embedsCount = count($split) - 1;
