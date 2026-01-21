@@ -122,7 +122,7 @@ class Embeds extends Component
             $type = $embed->type->handle;
             $embedBlocks[] = [
                 'type' => $type,
-                'data' => $this->getElementData($embed, $ignoreFields, $nestingLevel, $maxNestingLevel),
+                'data' => $this->getElementData($embed, $ignoreFields, $nestingLevel + 1, $maxNestingLevel),
             ];
         }
 
@@ -351,7 +351,6 @@ class Embeds extends Component
                         break;
                 }
             }
-            return $data;
         }
         return $data;
     }
