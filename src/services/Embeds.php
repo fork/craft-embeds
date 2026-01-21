@@ -94,7 +94,7 @@ class Embeds extends Component
      * @throws InvalidConfigException
      * @throws InvalidFieldException
      */
-    private function mergeEmbeds(string $embedsCopy, array $embeds): array
+    private function mergeEmbeds(string $embedsCopy, array $embeds, array $ignoreFields = [], int $nestingLevel = 0, int $maxNestingLevel = 5): array
     {
         // Handle copy
         $embedsCopy = str_replace("\n", "", $embedsCopy);
@@ -122,7 +122,7 @@ class Embeds extends Component
             $type = $embed->type->handle;
             $embedBlocks[] = [
                 'type' => $type,
-                'data' => $this->getElementData($embed),
+                'data' => $this->getElementData($embed, $ignoreFields, $nestingLevel, $maxNestingLevel),
             ];
         }
 
@@ -185,7 +185,7 @@ class Embeds extends Component
      * @throws InvalidConfigException
      * @throws InvalidFieldException
      */
-    public function getElementData(Element $element, array $ignoreFields = [], int $nestingLevel = 0): array
+    public function getElementData(Element $element, array $ignoreFields = [], int $nestingLevel = 0, int $maxNestingLevel = 5): array
     {
         // Handle different element types and set their specific attributes
         switch (get_class($element)) {
@@ -224,7 +224,7 @@ class Embeds extends Component
                     'uri' => $element->uri,
                     'status' => $element->status,
                     'authorId' => $element->section->type == "single" ? null : $element->author?->id,
-                    'postDate' => !is_null($element->postDate) ? $this->convertDateTime($element->postDate) : null,
+                    'postDate' => $this->convertDateTime($element->postDate),
                     'section' => $element->section->handle,
                     'dateCreated' => $this->convertDateTime($element->dateCreated),
                     'dateUpdated' => $this->convertDateTime($element->dateUpdated),
@@ -238,21 +238,17 @@ class Embeds extends Component
                 break;
         }
 
-        if ($nestingLevel >= 5) {
+        if ($nestingLevel >= $maxNestingLevel) {
             return $data;
         }
 
         if ($element->{$this->embedsFieldName} && $element->{$this->embedsCopyFieldName}) {
-            $content = "";
-            if ($element->{$this->embedsCopyFieldName} !== null) {
-                /** @var FieldData $copy */
-                $copy = $element->{$this->embedsCopyFieldName};
-                $content = $copy->getParsedContent();
-            }
+            /** @var FieldData $copy */
+            $copy = $element->{$this->embedsCopyFieldName};
 
             /** @var EntryQuery $embeds */
             $embeds = $element->{$this->embedsFieldName};
-            $data['embeds'] = $this->mergeEmbeds($content, $embeds->all());
+            $data['embeds'] = $this->mergeEmbeds($copy->getParsedContent(), $embeds->all(), $ignoreFields, $nestingLevel, $maxNestingLevel);
         }
 
         /** @var FieldLayout $fieldLayout */
@@ -355,6 +351,7 @@ class Embeds extends Component
                         break;
                 }
             }
+            return $data;
         }
         return $data;
     }
